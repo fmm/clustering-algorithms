@@ -100,9 +100,8 @@ int main(int argc, char **argv) {
 
   read(arq.c_str());
 
-  //srand(time(NULL));
-  srand(7);
-
+  srand(time(NULL));
+  
   try {
     Repositorio repositorio(v);
     ofstream out(saida.c_str(), ios::out);
