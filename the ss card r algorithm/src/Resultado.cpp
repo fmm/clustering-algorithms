@@ -253,6 +253,7 @@ bool Resultado::atualizarUW(const Repositorio& repositorio) {
     rep(t,n) {
       double sum = 0;
       rep(cc,c) sum += U[cc][t];
+      assert(cmp(sum));
       rep(cc,c) U[cc][t] /= sum;
     }
   }
