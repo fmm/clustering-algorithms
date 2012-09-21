@@ -1,0 +1,595 @@
+numCluster == 3
+numInicializacao == 5
+numIteracoes == 300
+parametro_q == 2
+var_classe == 1
+input:
+1 : input/iris/Iris-f[abs]_var[1].sds
+2 : input/iris/Iris-f[abs]_var[2].sds
+3 : input/iris/Iris-f[abs]_var[3].sds
+4 : input/iris/Iris-f[abs]_var[4].sds
+output:
+iris.txt
+Known labes:
+*** 74 in class 2
+*** 41 in class 0
+*** 131 in class 1
+*** alpha will be update automatically in each iteration
+~~ ######################################### ~~
+*** alpha now is: 4.45061
+!!! Fixing U membership. !!!
+!!! problem updating function J, it didn't decrease !!!
+*** Old J: 13.04
+*** New J: 19.2247
+atual.J == 19.2247
+*** alpha now is: 5.42931
+!!! Fixing U membership. !!!
+!!! problem updating function J, it didn't decrease !!!
+*** Old J: 19.2247
+*** New J: 21.3176
+atual.J == 21.3176
+*** alpha now is: 5.23275
+!!! Fixing U membership. !!!
+atual.J == 20.7872
+*** alpha now is: 5.16085
+!!! Fixing U membership. !!!
+atual.J == 20.388
+*** alpha now is: 5.03313
+!!! Fixing U membership. !!!
+atual.J == 19.7086
+*** alpha now is: 4.82119
+!!! Fixing U membership. !!!
+atual.J == 18.7722
+*** alpha now is: 4.56489
+!!! Fixing U membership. !!!
+atual.J == 17.8713
+*** alpha now is: 4.39817
+!!! Fixing U membership. !!!
+atual.J == 17.0489
+*** alpha now is: 4.47395
+!!! Fixing U membership. !!!
+atual.J == 13.6026
+*** alpha now is: 7.43286
+!!! Fixing U membership. !!!
+atual.J == 8.43577
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.41507
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.40211
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.39344
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38811
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38513
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.3836
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38285
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.3825
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38234
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38227
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38223
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38222
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+~~ ######################################### ~~
+*** alpha now is: 4.30321
+!!! Fixing U membership. !!!
+!!! problem updating function J, it didn't decrease !!!
+*** Old J: 20.6644
+*** New J: 25.0183
+atual.J == 25.0183
+*** alpha now is: 3.12014
+!!! Fixing U membership. !!!
+atual.J == 17.6093
+*** alpha now is: 4.92284
+!!! Fixing U membership. !!!
+!!! problem updating function J, it didn't decrease !!!
+*** Old J: 17.6093
+*** New J: 27.6229
+atual.J == 27.6229
+*** alpha now is: 2.98408
+!!! Fixing U membership. !!!
+atual.J == 16.5369
+*** alpha now is: 5.28436
+!!! Fixing U membership. !!!
+!!! problem updating function J, it didn't decrease !!!
+*** Old J: 16.5369
+*** New J: 28.0757
+atual.J == 28.0757
+*** alpha now is: 3.00227
+!!! Fixing U membership. !!!
+atual.J == 16.1494
+*** alpha now is: 5.07241
+!!! Fixing U membership. !!!
+!!! problem updating function J, it didn't decrease !!!
+*** Old J: 16.1494
+*** New J: 19.7898
+atual.J == 19.7898
+*** alpha now is: 4.82248
+!!! Fixing U membership. !!!
+atual.J == 18.8205
+*** alpha now is: 4.59142
+!!! Fixing U membership. !!!
+atual.J == 17.9
+*** alpha now is: 4.4319
+!!! Fixing U membership. !!!
+atual.J == 16.7894
+*** alpha now is: 4.65437
+!!! Fixing U membership. !!!
+atual.J == 11.5627
+*** alpha now is: 12.7443
+!!! Fixing U membership. !!!
+atual.J == 8.44601
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.42607
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.41125
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.39989
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.39208
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38732
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38471
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38339
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38275
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38245
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38232
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38226
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38223
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38222
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+~~ ######################################### ~~
+*** alpha now is: 5.56638
+!!! Fixing U membership. !!!
+atual.J == 18.3188
+*** alpha now is: 8.02178
+!!! Fixing U membership. !!!
+atual.J == 10.849
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 10.8052
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 10.7222
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 10.5488
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 10.1846
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 9.56177
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.94136
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.60863
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.49122
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.45299
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.4331
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.41743
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.40464
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.39527
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38922
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38574
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.3839
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.383
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38257
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38237
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38228
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38224
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38222
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+~~ ######################################### ~~
+*** alpha now is: 4.82903
+!!! Fixing U membership. !!!
+atual.J == 20.2461
+*** alpha now is: 5.29401
+!!! Fixing U membership. !!!
+!!! problem updating function J, it didn't decrease !!!
+*** Old J: 20.2461
+*** New J: 21.1662
+atual.J == 21.1662
+*** alpha now is: 5.2891
+!!! Fixing U membership. !!!
+atual.J == 21.1448
+*** alpha now is: 5.28332
+!!! Fixing U membership. !!!
+atual.J == 21.1067
+*** alpha now is: 5.27003
+!!! Fixing U membership. !!!
+atual.J == 21.0123
+*** alpha now is: 5.23611
+!!! Fixing U membership. !!!
+atual.J == 20.7716
+*** alpha now is: 5.14967
+!!! Fixing U membership. !!!
+atual.J == 20.216
+*** alpha now is: 4.95834
+!!! Fixing U membership. !!!
+atual.J == 19.2767
+*** alpha now is: 4.67999
+!!! Fixing U membership. !!!
+atual.J == 18.2702
+*** alpha now is: 4.47405
+!!! Fixing U membership. !!!
+atual.J == 17.4093
+*** alpha now is: 4.48317
+!!! Fixing U membership. !!!
+atual.J == 14.4096
+*** alpha now is: 6.60259
+!!! Fixing U membership. !!!
+atual.J == 8.44495
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.42098
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.40647
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.3964
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38989
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.3861
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38408
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38308
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38261
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38239
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38229
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38224
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38222
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+~~ ######################################### ~~
+*** alpha now is: 4.37765
+!!! Fixing U membership. !!!
+atual.J == 14.2498
+*** alpha now is: 12.617
+!!! Fixing U membership. !!!
+atual.J == 10.3227
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 9.92084
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 9.325
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.77135
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.51458
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.43874
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.41363
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.40055
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.39238
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38748
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.3848
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38343
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38277
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38246
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38232
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38226
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38223
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38222
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+!!! attempt of division by zero, alpha now is 1.0 !!!
+*** alpha now is: 1
+!!! Fixing U membership. !!!
+atual.J == 8.38221
+ret.first << " , " << ret.second == 3 , -133
+ending...
