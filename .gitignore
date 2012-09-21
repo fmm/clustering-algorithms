@@ -15,6 +15,7 @@
 *.out
 *.sds
 *.pdf
+*.txt
 input/
 output/
 
