@@ -1,35 +1,37 @@
 [cluster_number]
-6
+3
 
 [prototype_number]
-2
+1
 
 [initialization_number]
 100
+
+[maximum_iteration_number]
+300
 
 [class_variable]
 1
 
 [label]
-0.80
+0.50
 
 [alpha]
-99.00
+9.9
 
-[maximum_iteration_number]
-150
+[repeat]
+1
 
-[input]
-glass2.sds
-glass3.sds
-glass4.sds
-glass5.sds
-glass6.sds
-glass7.sds
-glass8.sds
-glass9.sds
-glass10.sds
+[magic]
+0
+
+[automatic_alpha]
+True
+
+[order]
+108 121 60 79 90 49 140 144 118 65 147 138 76 69 2 11 137 78 120 17 81 124 21 107 134 111 132 20 91 92 14 15 119 95 84 146 62 77 71 37 12 80 83 35 135 4 38 24 68 117 22 19 64 113 36 100 59 128 145 88 66 29 34 126 44 43 61 148 130 51 30 102 40 46 96 25 104 129 10 139 56 42 23 110 143 13 105 103 16 41 8 3 7 141 85 86 74 72 123 0 75 98 5 54 149 73 55 115 27 50 125 26 89 33 106 47 94 136 48 67 52 133 109 18 6 9 87 82 32 28 63 131 114 1 112 101 127 97 31 39 116 99 45 53 142 122 70 58 57 93
 
 [output]
-main_glass_20.tex
+
+[input]
 

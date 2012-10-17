@@ -1,8 +1,9 @@
 #include <bits/stdc++.h>
 #include <sys/time.h>
 #define rep(x,n) for(int x = 0; x < int(n); ++x)
-#define dbg(x) cerr << #x << " == " << x << endl
+#define dbg(x) cerr << #x << " = " << x << endl
 #define _ << " , " <<
+#define dbg_(x) cerr << #x << " = " << x
 using namespace std;
 
 typedef long double long_double;
@@ -10,7 +11,8 @@ typedef long double long_double;
 
 const double eps = 1e-7;
 const int inf = ~0u>>1;
-const unsigned long long TLE = 3 * 60000000ULL; // minutes
+const unsigned long long TLE = 60 * 60000000ULL; // minutes
+const double max_alpha = 1e2;
 
 typedef vector< double > Row;
 typedef vector< Row > Matrix;
@@ -165,9 +167,10 @@ namespace Validation {
     MinimumCostMaximumFlow::init();
     rep(i,N) rep(j,M) MinimumCostMaximumFlow::add(i + 1, j + N + 1, -tab[i][j], 1);
     rep(i,N) MinimumCostMaximumFlow::add(source, i + 1, 0, 1);
-    rep(i,M) MinimumCostMaximumFlow::add(i + N + 1, sink, 0, N == M ? 1 : N);
+    int cflow = (N == M ? 1 : N);
+    rep(i,M) MinimumCostMaximumFlow::add(i + N + 1, sink, 0, cflow);
     Pair ret = MinimumCostMaximumFlow::mcmf(source, sink);
-    rep(i,N) rep(j,M) if(MinimumCostMaximumFlow::cap[(i*M+j)<<1] == 0) match[i] = j;
+    rep(i,N) rep(j,M) if(MinimumCostMaximumFlow::cap[(i*M+j)<<1] != cflow) match[i] = j;
     assert(ret.second == N);
     return make_pair(1.0 + double(ret.first) / n, match);
   }
@@ -381,6 +384,7 @@ vector< Cluster > priori_cluster;
 set< Pair > must_link, must_not_link;
 vector< string > file;
 vector< Matrix > table;
+bool automatic_alpha;
 
 struct Scanner {  
   Scanner(string config) {
@@ -404,6 +408,7 @@ struct Scanner {
     M["[individual_number]"].push_back(Util::cast<string>(N));
     table = vector< Matrix >(T, Matrix(N, Row(N,0.0)));
     rep(i,T) read_table(file[i], table[i]);
+    automatic_alpha = M.count("[automatic_alpha]") && M["[automatic_alpha]"][0] == string("True");
   }
   void read_individual_number_and_priori_cluster(string file_name) {
     ifstream in(file_name.c_str(), ios::in);
@@ -437,8 +442,8 @@ struct Scanner {
         if(line[j] == '(') ct++; else if(line[j] == ')') ct--;
         piece.push_back(line[j]);
         if(ct == 0) {
-          if(piece[0] != ',') v.push_back(piece);
-          piece.clear();
+          if(piece[0] == ',') piece.clear();
+          else if(line[j+1] == ',') v.push_back(piece);
         }
       }
       piece = v[class_variable - 1];
@@ -632,7 +637,7 @@ namespace Algorithm {
             rep(k,C) if(U[i][k] < 0) U[i][k] = 0; else if(U[i][k] > 1.0) U[i][k] = 1.0;
             double sum = 0;
             rep(k,C) sum += U[i][k];
-            assert(fabs(sum-1) <= 1e-7);
+            assert(fabs(sum-1) <= eps);
             rep(k,C) U[i][k] /= sum;
           }
 end: rep(k,C) diff = max(diff, previous[k] - U[i][k]);
@@ -646,7 +651,7 @@ end: rep(k,C) diff = max(diff, previous[k] - U[i][k]);
         rep(t,T) rep(i,N) rep(j,N) dist[i] += table[t][i][j] * Util::square(U[j][k]) * coefficient[k][t];
         vector< pair< double, int > > v(N);
         rep(i,N) v[i] = make_pair(dist[i], i);
-        sort(v.begin(),v.end());
+        nth_element(v.begin(),v.begin()+P,v.end());
         rep(p,P) prototype[k][p] = v[p].second;
       }
     }
@@ -712,14 +717,50 @@ end: rep(k,C) diff = max(diff, previous[k] - U[i][k]);
       return J < answer.J;
     }
   };
+  double find_alpha(double start = max_alpha) {
+    const double this_alpha = alpha;
+    double ans = start, take = start, R= log2(start) + 10;
+    rep(i,R) {
+      double nans = ans - take; take /= 2;
+      if(nans < 0) continue; else alpha = nans;
+      rep(j,5) {
+        Answer x(-1);
+        x.srand();
+        rep(r,300) {
+          x.updatePrototypes();
+          x.updateCoefficient();
+          x.updateU();
+          x.updateCluster();
+          double old_J = x.J;
+          double new_J = x.updateJ();
+          if(fabs(old_J-new_J) <= eps || x.restriction <= eps) break;
+        }
+        if(x.restriction <= 1e0) {
+          ans = nans;
+          break;
+        }
+      }
+    }
+    alpha = this_alpha;
+    return ans;
+  }
   Answer main(Latex& latex, bool print = true) {
+    const double this_alpha = alpha;
+    if(automatic_alpha) {
+      double alpha1 = find_alpha();
+      dbg( (alpha = alpha1) );
+    }
     Counter::start_timer();
     Answer opt(-1);
     rep(initialization,initialization_number) {
-      if(Counter::elapsed()>TLE) break;
+      if(Counter::elapsed()>TLE) {
+        cerr << "tle at " << initialization << endl;
+        break;
+      }
       Answer now(initialization);
       now.srand();
       rep(iteration,maximum_iteration_number) {
+        //dbg_(iteration _ now.J _ now.restriction); // FIXME
         now.updatePrototypes();
         now.updateCoefficient();
         now.updateU();
@@ -729,52 +770,68 @@ end: rep(k,C) diff = max(diff, previous[k] - U[i][k]);
         if(new_J>old_J&&fabs(new_J-old_J)>1e-0) {
           fprintf(stderr,"increment (%+.7Lf)\n", new_J - old_J);
         }
-        if(fabs(old_J - new_J) <= 1e-12) { // optmize
-          const double inside = 1.0 - 1.0 / (C), outside = 1.0 / (C);
-          __typeof(must_link) ml = must_link;
-          __typeof(must_not_link) mnl = must_not_link;
-          rep(k,C) rep(i,N) {
-            if(now.U[i][k] > inside) rep(j,i) {
-              if(now.U[j][k] > inside) {
-                must_link.insert( make_pair(i,j) );
-                must_link.insert( make_pair(j,i) );
-              }
-              else if(now.U[j][k] < outside) {
-                must_not_link.insert( make_pair(i,j) );
-                must_not_link.insert( make_pair(j,i) );
-              }
-            }
-            else if(now.U[i][k] < outside) rep(j,i) {
-              if(now.U[j][k] > inside) {
-                must_not_link.insert( make_pair(i,j) );
-                must_not_link.insert( make_pair(j,i) );
-              }
-            }
+        if(fabs(old_J - new_J) <= eps) break; else opt = min(opt,now);
+      }
+      //dbg(initialization _ now.J _ now.restriction); // FIXME
+    }
+    if(true) { // optmize
+      const double magic = M.count("[magic]") ? Util::cast<double>(M["[magic]"][0]) : 1e9;
+      const double inside = 1.0 - 1.0 / (C + magic), outside = 1.0 / (C + magic);
+      __typeof(must_link) ml = must_link;
+      __typeof(must_not_link) mnl = must_not_link;
+      rep(k,C) rep(i,N) {
+        if(opt.U[i][k] > inside) rep(j,i) {
+          if(opt.U[j][k] > inside) {
+            must_link.insert( make_pair(i,j) );
+            must_link.insert( make_pair(j,i) );
           }
-          for(int turn=0,max_turn=3;turn<max_turn;turn++){ // let's try again a few times!
-            Answer now2(initialization);
-            now2.srand();
-            rep(iteration2,maximum_iteration_number) {
-              now2.updatePrototypes();
-              now2.updateCoefficient();
-              now2.updateU();
-              now2.updateCluster();
-              double old_J2 = now2.J;
-              double new_J2 = now2.updateJ();
-              if(new_J2>old_J2&&fabs(new_J2-old_J2)>1e-0) {
-                fprintf(stderr,"increment (%+.7Lf)\n", new_J2 - old_J2);
-              }
-              else if(fabs(old_J2 - new_J2) <= eps) break; else opt = min(opt,now2);
-            }
+          else if(opt.U[j][k] < outside) {
+            must_not_link.insert( make_pair(i,j) );
+            must_not_link.insert( make_pair(j,i) );
           }
-          must_link = ml;
-          must_not_link = mnl;
+        }
+        else if(opt.U[i][k] < outside) rep(j,i) {
+          if(opt.U[j][k] > inside) {
+            must_not_link.insert( make_pair(i,j) );
+            must_not_link.insert( make_pair(j,i) );
+          }
+        }
+      }
+      opt.J = DBL_MAX;
+      if(automatic_alpha) {
+        double alpha2 = find_alpha();
+        dbg( (alpha = alpha2) );
+      }
+      Counter::start_timer();
+      rep(initialization2,initialization_number) {
+        if(Counter::elapsed()>TLE) {
+          cerr << "tle tle at " << initialization2 << endl;
           break;
         }
-        else opt = min(opt, now);
+        Answer now2(initialization2);
+        now2.srand();
+        rep(iteration2,maximum_iteration_number) {
+          //dbg_(iteration2 _ now2.J _ now2.restriction); // FIXME
+          now2.updatePrototypes();
+          now2.updateCoefficient();
+          now2.updateU();
+          now2.updateCluster();
+          double old_J2 = now2.J;
+          double new_J2 = now2.updateJ();
+          if(new_J2>old_J2&&fabs(new_J2-old_J2)>1e-0) {
+            fprintf(stderr,"increment2 (%+.7Lf)\n", new_J2 - old_J2);
+          }
+          else if(fabs(old_J2 - new_J2) <= eps) break; else opt = min(opt,now2);
+        }
+        //dbg(initialization2 _ now2.J _ now2.restriction); // FIXME
       }
+      must_link = ml;
+      must_not_link = mnl;   
     }
     if(print) {
+      if(automatic_alpha) {
+        M["[alpha]"] = vector< string >(1,Util::cast<string>(alpha));
+      }
       char text[1<<10];
       string caption;
       vector<string> elem;
@@ -839,6 +896,19 @@ end: rep(k,C) diff = max(diff, previous[k] - U[i][k]);
         }
         latex.print_itemize(v_elem);
       }
+      if(true) {
+        elem.clear();
+        rep(k,C) {
+          stringstream ss;
+          rep(p,P) {
+            if(p) ss << ",";
+            ss << opt.prototype[k][p]+1;
+          }
+          sprintf(text,"Cluster %d: \\textbf{%s}",k+1,ss.str().c_str());
+          elem.push_back(text);
+        }
+        latex.print_itemize(elem);
+      }
       caption = "Fuzzy clustering";
       elem.clear();
       elem.push_back("~");
@@ -852,13 +922,6 @@ end: rep(k,C) diff = max(diff, previous[k] - U[i][k]);
         }
       }
       latex.print_long_table(C+1,caption,elem);
-      if(my_alpha.size()) {
-        pair< double, double > alpha_interval = Analysis::build(my_alpha);
-        latex<<"\\tiny\n";
-        stringstream s;
-        s << "alpha: [" << setprecision(6) << fixed << alpha_interval.first << "," << alpha_interval.second << "], ";
-        latex<<s.str();
-      }
       if(true) {
         latex<<"\\tiny\n";
         stringstream s;
@@ -867,6 +930,7 @@ end: rep(k,C) diff = max(diff, previous[k] - U[i][k]);
       }
       latex<<"\\pagebreak\n";
     }
+    alpha = this_alpha;
     return opt;
   }
 };
@@ -1023,7 +1087,7 @@ namespace Another {
         }
       }
       // check
-      if(!updateJ(newU,newW)&&false) return false;
+      if(!updateJ(newU,newW)) return false;
       rep(k,C) rep(i,N) U[k][i] = newU[k][i];
       rep(k,C) rep(t,T) W[k][t] = newW[k][t];
       updateCluster();
@@ -1075,11 +1139,43 @@ namespace Another {
       return J < answer.J;
     }
   };
+  double find_alpha(double start = max_alpha) {
+    const double this_alpha = alpha;
+    double ans = start, take = start, R= log2(start) + 10;
+    rep(i,R) {
+      double nans = ans - take; take /= 2;
+      if(nans < 0) continue; else alpha = nans;
+      rep(j,5) {
+        Answer x(-1);
+        x.srand();
+        rep(r,300) {
+          double old_J = x.J;
+          if(!x.update()) break;
+          double new_J = x.updateJ();
+          if(fabs(old_J-new_J) <= eps || x.restriction <= eps) break;
+        }
+        if(x.restriction <= 1e0) {
+          ans = nans;
+          break;
+        }
+      }
+    }
+    alpha = this_alpha;
+    return ans;
+  }
   Answer main(Latex& latex, bool print = true) {
+    const double this_alpha = alpha;
+    if(automatic_alpha) {
+      double alpha3 = find_alpha(); // FIXME
+      dbg( (alpha = alpha3) );
+    }
     Answer opt(-1);
     Counter::start_timer();
     rep(initialization,initialization_number) {
-      if(Counter::elapsed()>TLE) break;
+      if(Counter::elapsed()>TLE) {
+        cerr << "tle at " << initialization << endl;
+        break;
+      }
       Answer now(initialization);
       now.srand();
       rep(iteration,maximum_iteration_number) {
@@ -1090,6 +1186,9 @@ namespace Another {
       }
     }
     if(print){
+      if(automatic_alpha) {
+        M["[alpha]"] = vector< string >(1,Util::cast<string>(alpha));
+      }
       char text[1<<10];
       string caption;
       vector<string> elem;
@@ -1159,21 +1258,15 @@ namespace Another {
         }
       }
       latex.print_long_table(C+1,caption,elem);
-      if(his_alpha.size()) {
-        pair< double, double > alpha_interval = Analysis::build(his_alpha);
-        latex<<"\\tiny\n";
-        stringstream s;
-        s << "alpha: [" << setprecision(6) << fixed << alpha_interval.first << "," << alpha_interval.second << "], ";
-        latex<<s.str();
-      }
       if(true) {
         latex<<"\\tiny\n";
         stringstream s;
-        s << setprecision(6) << fixed << Counter::elapsed() / 1000000.0 << " seconds, with seed = " << seed << ".\n\n";
+        s << setprecision(6) << fixed << Counter::elapsed() / 6000000.0 << " minutes, with seed = " << seed << ".\n\n";
         latex<<s.str();
       }
       latex<<"\\pagebreak\n";
     }
+    alpha = this_alpha;
     return opt;
   }
 };
@@ -1262,32 +1355,14 @@ namespace Generator {
       else must_not_link.insert( make_pair(a,b) );
     }
   }
-  void manual(vector<int> object) {
-    must_link.clear();
-    must_not_link.clear();
-    map< int, int > mapping;
-    int n = object.size();
-    rep(i,n) rep(j,n) if(i != j) {
-      int a = object[i], b = object[j];
-      if(mapping[a] == mapping[b]) {
-        must_link.insert( make_pair(a,b) );
-      }
-      else {
-        must_not_link.insert( make_pair(a,b) );
-      }
-    }
-  }
 };
 
 int main() {
   seed = time(NULL);
-  seed = 1349834048ULL;
-  dbg(seed);
-
+  seed = 13498946017ULL;
   MersenneTwister::build(seed);
-
+  dbg(seed);
   Scanner scan("config");
-
   if(false) {
     Generator::prepare();
     if(true){
@@ -1299,57 +1374,43 @@ int main() {
     }
     if(false) return 0;
   }
-
   string out = M["[output]"][0];
   ofstream out_file(out.c_str(),ios::out);
-
   vector< double > E1, E2;
   vector< vector< int > > tab;
   vector< int > v1, v2;
-
   Latex latex(out_file);
   latex.begin();
-
-  if(false) {
-    string s1 = "171 172 186 107 108 112 110 111 109 185 131 105 175 180 163 174 170 188 201 169 61 189 173 167 168 181 106 183 130 178 129 103 184 128 84 179 176 21 104 63 166 165 92 38 39 47 157 161 17 70 69 162 102 50 43 56 127 164 48 100 177 5 0 65 66 10 68 144 67 207 18 121 97 12 145 64 142 54 160 19 20 78 124 89 152 45 62 187 136 123 86 44 141 79 87 117 80 2 93 101 118 6 74 143 134 158 4 75 159 32 72 13 1 81 53 182 60 59 95 7 76 98 140 119 96 9 26 91 51 155 30 146 94 8 139 73 99 88 154 122 77 42 125 82 52 33 137 85 3 135 22 133 31 132 153 14 40 41 28 25 113 15 34 11 126 23 115 37 29 147 27 156 120 57 211 205 213 212 203 193 194 210 206 209 192 208 195 202 198 199 197 204 16 24 35 36 46 49 55 58 71 83 90 114 116 138 148 149 150 151 190 191 196 200";
-    for(stringstream ss1(s1);;){
-      string tmp;
-      if(ss1>>tmp){
-        v1.push_back(Util::cast<int>(tmp));
-      }
-      else break;
-    }
-    scan.manual(v1,label);
+  int do_manual = int(M["[order]"].size());
+  if(do_manual) {
+    vector< string > vs = M["[order]"];
+    vector< int > vi(vs.size());
+    rep(i,vs.size()) vi[i] = Util::cast<int>(vs[i]);
+    scan.manual(vi);
+    M.erase("[order]");
   }
-
-  rep(R,1) {
-    //scan.generate_restrictions();
-    //Generator::generate_restrictions();
-    //x
-    Algorithm::update_coefficient_table = true;
+  int repeat = Util::cast<int>(M["[repeat]"][0]);
+  rep(R,repeat) {
+    if(!do_manual) scan.generate_restrictions();
+    Algorithm::update_coefficient_cluster_table = true;
     Algorithm::Answer a = Algorithm::main(latex);
     tab = a.confusing_matrix();
-    //v1 = a.get_order();
+    v1 = a.get_order();
+    cerr << "! " << a.restriction << endl;
     E1.push_back( Validation::global_error(N,tab).first );
-    cerr << "!";
-    //another
     Another::Answer b = Another::main(latex);
     tab = b.confusing_matrix();
-    //v2 = b.get_order();
+    v2 = b.get_order();
     E2.push_back( Validation::global_error(N,tab).first );
-    cerr << "? ";
+    cerr << "? " << b.restriction << endl;
     dbg( R _ E1.back() _ E2.back() );
   }
-
   pair< double, double > i1 = Analysis::build(E1);
   pair< double, double > i2 = Analysis::build(E2);
-
   dbg(i1.first _ i1.second);
   dbg(i2.first _ i2.second);
-
-  //Util::pv(v1.begin(),v1.end());
-  //Util::pv(v2.begin(),v2.end());
-
+  cerr << "v1: "; Util::pv(v1.begin(),v1.end());
+  cerr << "v2: "; Util::pv(v2.begin(),v2.end());
   if(true) {
     latex<<"\\pagebreak\n";
     latex<<"\\large\n";
@@ -1359,15 +1420,8 @@ int main() {
     s << setprecision(12) << fixed << "his: (" << i2.first << ":" << i2.second << ")\n";
     latex<<s.str();
   }
-
   latex.end();
   out_file.close();
-
-  if(true) {
-    char cmd[1<<10];
-    sprintf(cmd,"pdflatex %s > log", out.c_str());
-    dbg( system(cmd) );
-  }
-
   return 0;
 }
+
