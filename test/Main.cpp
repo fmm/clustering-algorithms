@@ -136,7 +136,7 @@ namespace MinimumCostMaximumFlow {
   Pair mcmf(int source, int sink) {
     Pair p(0,0); // cost,flow
     for(;;) {
-      vector< int > pot(n, inf), pai(n, -1);
+      vector< int > pot(n,inf), pai(n,-1);
       pot[source] = 0;
       rep(k,n) rep(i,n) for(int j = adj[i]; j >= 0; j = ant[j]) {
         if(cap[j] && pot[i] + w[j] < pot[to[j]]) {
@@ -447,7 +447,7 @@ struct Scanner {
         }
       }
       piece = v[class_variable - 1];
-      size_t priori;
+      unsigned int priori;
       assert(sscanf(piece.c_str(),"%u",&priori) == 1);
       while(priori > priori_cluster.size()) priori_cluster.push_back(Cluster());
       priori_cluster[priori - 1].insert(i);
@@ -723,10 +723,11 @@ end: rep(k,C) diff = max(diff, previous[k] - U[i][k]);
     rep(i,R) {
       double nans = ans - take; take /= 2;
       if(nans < 0) continue; else alpha = nans;
+      int ok = 1;
       rep(j,5) {
         Answer x(-1);
         x.srand();
-        rep(r,300) {
+        rep(r,350) {
           x.updatePrototypes();
           x.updateCoefficient();
           x.updateU();
@@ -735,11 +736,12 @@ end: rep(k,C) diff = max(diff, previous[k] - U[i][k]);
           double new_J = x.updateJ();
           if(fabs(old_J-new_J) <= eps || x.restriction <= eps) break;
         }
-        if(x.restriction <= 1e0) {
-          ans = nans;
+        if(x.restriction > eps) {
+          ok = 0;
           break;
         }
       }
+      if(ok) ans = nans;
     }
     alpha = this_alpha;
     return ans;
@@ -952,9 +954,9 @@ namespace Another {
     }
     vector< int > get_order() {
       vector< double > doubt(N, 0.0);
-      rep(i,N) rep(k,C) rep(h,C) doubt[i] = max(doubt[i], fabs(U[k][i] - U[h][i]));
+      rep(i,N) rep(k,C) doubt[i] = max(doubt[i],U[k][i]);
       vector< pair< double, int > > v(N);
-      rep(i,N) v[i] = make_pair(-doubt[i],i);
+      rep(i,N) v[i] = make_pair(doubt[i],i);
       sort(v.begin(),v.end());
       vector< int > order(N);
       rep(i,N) order[i] = v[i].second;
@@ -1145,20 +1147,22 @@ namespace Another {
     rep(i,R) {
       double nans = ans - take; take /= 2;
       if(nans < 0) continue; else alpha = nans;
+      int ok = 1;
       rep(j,5) {
         Answer x(-1);
         x.srand();
-        rep(r,300) {
+        rep(r,350) {
           double old_J = x.J;
           if(!x.update()) break;
           double new_J = x.updateJ();
           if(fabs(old_J-new_J) <= eps || x.restriction <= eps) break;
         }
-        if(x.restriction <= 1e0) {
-          ans = nans;
+        if(x.restriction > eps) {
+          ok = 0;
           break;
         }
       }
+      if(ok) ans = nans;
     }
     alpha = this_alpha;
     return ans;
