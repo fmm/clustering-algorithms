@@ -1,9 +1,20 @@
+#if 0
+#define EXTREMELY_DETAILED
+#define DETAILED
+#define PROTOTYPE_VARIANCE
+#define MAGIC_VARIANCE
+#define RUN_ANOTHER
+#endif
+
+#ifdef DETAILED
+#define EXTREMELY_DETAILED
+#endif
+
 #include <bits/stdc++.h>
 #include <sys/time.h>
 #define rep(x,n) for(int x = 0; x < int(n); ++x)
 #define dbg(x) cerr << #x << " = " << x << endl
 #define _ << " , " <<
-#define dbg_(x) cerr << #x << " = " << x
 using namespace std;
 
 typedef long double long_double;
@@ -12,7 +23,7 @@ typedef long double long_double;
 const double eps = 1e-7;
 const int inf = ~0u>>1;
 const unsigned long long TLE = 60 * 60000000ULL; // minutes
-const double max_alpha = 1e2;
+const double max_alpha = 1e3;
 
 typedef vector< double > Row;
 typedef vector< Row > Matrix;
@@ -301,7 +312,7 @@ struct Latex {
     out.flush();
   }
   void print_name(string name) {
-    out<<"% here it goes %\n"
+    out<<"%% here it goes %%\n"
       "\\centering\n"
       "\\paragraph{\\textit{Fuzzy Analysis @ "<<name<<"}}\n";
   }
@@ -723,7 +734,7 @@ end: rep(k,C) diff = max(diff, previous[k] - U[i][k]);
     rep(i,R) {
       double nans = ans - take; take /= 2;
       if(nans < 0) continue; else alpha = nans;
-      int ok = 1;
+      int ok = 0;
       rep(j,5) {
         Answer x(-1);
         x.srand();
@@ -736,8 +747,8 @@ end: rep(k,C) diff = max(diff, previous[k] - U[i][k]);
           double new_J = x.updateJ();
           if(fabs(old_J-new_J) <= eps || x.restriction <= eps) break;
         }
-        if(x.restriction > eps) {
-          ok = 0;
+        if(x.restriction <= eps) {
+          ok = 1;
           break;
         }
       }
@@ -750,31 +761,42 @@ end: rep(k,C) diff = max(diff, previous[k] - U[i][k]);
     const double this_alpha = alpha;
     if(automatic_alpha) {
       double alpha1 = find_alpha();
-      dbg( (alpha = alpha1) );
+      alpha = alpha1;
+#ifdef DETAILED
+      dbg(alpha1);
+#endif
     }
     Counter::start_timer();
     Answer opt(-1);
     rep(initialization,initialization_number) {
       if(Counter::elapsed()>TLE) {
+#ifdef DETAILED
         cerr << "tle at " << initialization << endl;
+#endif
         break;
       }
       Answer now(initialization);
       now.srand();
       rep(iteration,maximum_iteration_number) {
-        //dbg_(iteration _ now.J _ now.restriction); // FIXME
+#ifdef EXTREMELY_DETAILED
+        dbg(iteration _ now.J _ now.restriction);
+#endif
         now.updatePrototypes();
         now.updateCoefficient();
         now.updateU();
         now.updateCluster();
         double old_J = now.J;
         double new_J = now.updateJ();
+#ifdef DETAILED
         if(new_J>old_J&&fabs(new_J-old_J)>1e-0) {
           fprintf(stderr,"increment (%+.7Lf)\n", new_J - old_J);
         }
+#endif
         if(fabs(old_J - new_J) <= eps) break; else opt = min(opt,now);
       }
-      //dbg(initialization _ now.J _ now.restriction); // FIXME
+#ifdef EXTREMELY_DETAILED
+      dbg(initialization _ now.J _ now.restriction);
+#endif
     }
     if(true) { // optmize
       const double magic = M.count("[magic]") ? Util::cast<double>(M["[magic]"][0]) : 1e9;
@@ -802,30 +824,41 @@ end: rep(k,C) diff = max(diff, previous[k] - U[i][k]);
       opt.J = DBL_MAX;
       if(automatic_alpha) {
         double alpha2 = find_alpha();
-        dbg( (alpha = alpha2) );
+        alpha = alpha2;
+#ifdef DETAILED
+        dbg(alpha2);
+#endif
       }
       Counter::start_timer();
       rep(initialization2,initialization_number) {
         if(Counter::elapsed()>TLE) {
+#ifdef DETAILED
           cerr << "tle tle at " << initialization2 << endl;
+#endif
           break;
         }
         Answer now2(initialization2);
         now2.srand();
         rep(iteration2,maximum_iteration_number) {
-          //dbg_(iteration2 _ now2.J _ now2.restriction); // FIXME
+#ifdef EXTREMELY_DETAILED
+          dbg(iteration2 _ now2.J _ now2.restriction);
+#endif
           now2.updatePrototypes();
           now2.updateCoefficient();
           now2.updateU();
           now2.updateCluster();
           double old_J2 = now2.J;
           double new_J2 = now2.updateJ();
+#ifdef DETAILED
           if(new_J2>old_J2&&fabs(new_J2-old_J2)>1e-0) {
             fprintf(stderr,"increment2 (%+.7Lf)\n", new_J2 - old_J2);
           }
-          else if(fabs(old_J2 - new_J2) <= eps) break; else opt = min(opt,now2);
+#endif
+          if(fabs(old_J2 - new_J2) <= eps) break; else opt = min(opt,now2);
         }
-        //dbg(initialization2 _ now2.J _ now2.restriction); // FIXME
+#ifdef EXTREMELY_DETAILED
+        dbg(initialization2 _ now2.J _ now2.restriction);
+#endif
       }
       must_link = ml;
       must_not_link = mnl;   
@@ -1147,7 +1180,7 @@ namespace Another {
     rep(i,R) {
       double nans = ans - take; take /= 2;
       if(nans < 0) continue; else alpha = nans;
-      int ok = 1;
+      int ok = 0;
       rep(j,5) {
         Answer x(-1);
         x.srand();
@@ -1157,8 +1190,8 @@ namespace Another {
           double new_J = x.updateJ();
           if(fabs(old_J-new_J) <= eps || x.restriction <= eps) break;
         }
-        if(x.restriction > eps) {
-          ok = 0;
+        if(x.restriction <= eps) {
+          ok = 1;
           break;
         }
       }
@@ -1171,13 +1204,18 @@ namespace Another {
     const double this_alpha = alpha;
     if(automatic_alpha) {
       double alpha3 = find_alpha(); // FIXME
-      dbg( (alpha = alpha3) );
+      alpha = alpha3;
+#ifdef DETAILED
+      dbg(alpha3);
+#endif
     }
     Answer opt(-1);
     Counter::start_timer();
     rep(initialization,initialization_number) {
       if(Counter::elapsed()>TLE) {
+#ifdef DETAILED
         cerr << "tle at " << initialization << endl;
+#endif
         break;
       }
       Answer now(initialization);
@@ -1363,7 +1401,6 @@ namespace Generator {
 
 int main() {
   seed = time(NULL);
-  seed = 13498946017ULL;
   MersenneTwister::build(seed);
   dbg(seed);
   Scanner scan("config");
@@ -1380,50 +1417,91 @@ int main() {
   }
   string out = M["[output]"][0];
   ofstream out_file(out.c_str(),ios::out);
-  vector< double > E1, E2;
-  vector< vector< int > > tab;
-  vector< int > v1, v2;
   Latex latex(out_file);
   latex.begin();
-  int do_manual = int(M["[order]"].size());
-  if(do_manual) {
-    vector< string > vs = M["[order]"];
-    vector< int > vi(vs.size());
-    rep(i,vs.size()) vi[i] = Util::cast<int>(vs[i]);
-    scan.manual(vi);
-    M.erase("[order]");
-  }
-  int repeat = Util::cast<int>(M["[repeat]"][0]);
-  rep(R,repeat) {
-    if(!do_manual) scan.generate_restrictions();
-    Algorithm::update_coefficient_cluster_table = true;
-    Algorithm::Answer a = Algorithm::main(latex);
-    tab = a.confusing_matrix();
-    v1 = a.get_order();
-    cerr << "! " << a.restriction << endl;
-    E1.push_back( Validation::global_error(N,tab).first );
-    Another::Answer b = Another::main(latex);
-    tab = b.confusing_matrix();
-    v2 = b.get_order();
-    E2.push_back( Validation::global_error(N,tab).first );
-    cerr << "? " << b.restriction << endl;
-    dbg( R _ E1.back() _ E2.back() );
-  }
-  pair< double, double > i1 = Analysis::build(E1);
-  pair< double, double > i2 = Analysis::build(E2);
-  dbg(i1.first _ i1.second);
-  dbg(i2.first _ i2.second);
-  cerr << "v1: "; Util::pv(v1.begin(),v1.end());
-  cerr << "v2: "; Util::pv(v2.begin(),v2.end());
-  if(true) {
-    latex<<"\\pagebreak\n";
-    latex<<"\\large\n";
-    stringstream s;
-    s << setprecision(12) << fixed << "my: (" << i1.first << ":" << i1.second << ")\n";
-    s << "\\\\\n";
-    s << setprecision(12) << fixed << "his: (" << i2.first << ":" << i2.second << ")\n";
-    latex<<s.str();
-  }
+#ifdef PROTOTYPE_VARIANCE
+  for(int this_P=Util::cast<int>(M["[prototype_number_begin]"][0]);this_P<=Util::cast<int>(M["[prototype_number_end]"][0]);this_P++){
+    P=this_P;
+    M["[prototype_number]"][0] = Util::cast<string>(this_P);
+#else
+    {
+#endif
+#ifdef MAGIC_VARIANCE
+      for(int this_magic=Util::cast<int>(M["[magic_begin]"][0]);this_magic<=Util::cast<int>(M["[magic_end]"][0]);this_magic++){
+        M["[magic]"][0] = Util::cast<string>(this_magic);
+#else
+        {
+#endif
+          vector< double > E1, E2;
+          vector< vector< int > > tab;
+          vector< int > v1, v2;
+          int do_manual = int(M["[order]"].size());
+          if(do_manual) {
+            vector< string > vs = M["[order]"];
+            vector< int > vi(vs.size());
+            rep(i,vs.size()) vi[i] = Util::cast<int>(vs[i]);
+            scan.manual(vi);
+            M.erase("[order]");
+          }
+          int repeat = Util::cast<int>(M["[repeat]"][0]);
+          rep(R,repeat) {
+            if(!do_manual) scan.generate_restrictions();
+            Algorithm::update_coefficient_cluster_table = true;
+            Algorithm::Answer a = Algorithm::main(latex);
+            tab = a.confusing_matrix();
+            v1 = a.get_order();
+#ifdef DETAILED
+            cerr << "! " << a.restriction << endl;
+#endif
+            E1.push_back( Validation::global_error(N,tab).first );
+#ifdef RUN_ANOTHER
+            Another::Answer b = Another::main(latex);
+            tab = b.confusing_matrix();
+            v2 = b.get_order();
+#ifdef DETAILED
+            cerr << "? " << b.restriction << endl;
+#endif
+#endif
+            E2.push_back( Validation::global_error(N,tab).first );
+#ifdef DETAILED
+            dbg( R _ E1.back() _ E2.back() );
+#else
+            cerr<<"("<<E1.back();
+#ifdef RUN_ANOTHER
+            <<","<<E2.back();
+#endif
+            cerr<<"),";
+#endif
+          }
+          cerr<<endl;
+          pair< double, double > i1 = Analysis::build(E1);
+          pair< double, double > i2 = Analysis::build(E2);
+          for(double magic = M.count("[magic]") ? Util::cast<double>(M["[magic]"][0]) : 1e9;;){
+            dbg(P _ magic _ i1.first _ i1.second);
+#ifdef RUN_ANOTHER
+            dbg(P _ magic _ i2.first _ i2.second);
+#endif
+            break;
+          }
+#ifdef DETAILED
+          cerr << "v1: "; Util::pv(v1.begin(),v1.end());
+          cerr << "v2: "; Util::pv(v2.begin(),v2.end());
+#endif
+          if(true) {
+            latex<<"\\pagebreak\n";
+            latex<<"\\large\n";
+            stringstream s;
+            s << setprecision(12) << fixed << "my: (" << i1.first << ":" << i1.second << ")\n";
+            s << "\\\\\n";
+            s << setprecision(12) << fixed << "his: (" << i2.first << ":" << i2.second << ")\n";
+            latex<<s.str();
+          }
+#if 1
+        }
+#endif
+#if 1
+      }
+#endif
   latex.end();
   out_file.close();
   return 0;

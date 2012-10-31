@@ -1,27 +1,42 @@
-CC=g++
-CFLAGS=-c -Wall -O2 -g -W
-LDFLAGS=
-SOURCES=Main.cpp
-OBJECTS=$(SOURCES:.cpp=.o)
-EXECUTABLE=Run.out
+#
+#if 0
+#	define EXTREMELY_DETAILED
+#	define DETAILED
+#	define PROTOTYPE_VARIANCE
+#	define MAGIC_VARIANCE
+#	define RUN_ANOTHER
+#endif
+#
 
-all: $(SOURCES) $(EXECUTABLE)
+tmp:
+	g++ -Wall -O2 -g -W Main.cpp -o Run.out
+
+all:
+	g++ -Wall -O2 -g -W Main.cpp -o Run.out -D RUN_ANOTHER -D DETAILED
+
+extremely_detailed:
+	g++ -Wall -O2 -g -W Main.cpp -o Run.out -D RUN_ANOTHER -D EXTREMELY_DETAILED
 	
-$(EXECUTABLE): $(OBJECTS) 
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+prototype:
+	g++ -Wall -O2 -g -W Main.cpp -o Run.out -D PROTOTYPE_VARIANCE
+	
+magic:
+	g++ -Wall -O2 -g -W Main.cpp -o Run.out -D MAGIC_VARIANCE
 
-.cpp.o:
-	$(CC) $(CFLAGS) $< -o $@
-
+prototype_magic:
+	g++ -Wall -O2 -g -W Main.cpp -o Run.out -D MAGIC_VARIANCE -D PROTOTYPE_VARIANCE
+	
 clean:
-	rm -rf *.o
 	rm -rf Run.out
+
+go:
+	./Run.out
 
 run:
 	./Run.out config
 
 pdf:
-	pdflatex main_glass.tex > log
+	pdflatex main.tex > log
 
 img:
 	javac Visualization.java
