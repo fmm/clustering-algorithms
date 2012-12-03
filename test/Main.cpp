@@ -1098,6 +1098,7 @@ namespace Another {
       rep(k,C) rep(i,N) newU[k][i] += alpha * (ct[i] - c[k][i]) / a[k][i];
       bool normalize = false;
       rep(k,C) rep(i,N) if(newU[k][i] < 0) newU[k][i] = 0, normalize = true; else if(newU[k][i] > 1.0) newU[k][i] = 1.0, normalize = true;
+      rep(k,C) rep(i,N) newU[k][i] = max(newU[k][i],eps);
       if(normalize) {
         rep(i,N) {
           double sum = 0;
