@@ -11,7 +11,8 @@
 *.la
 *.a
 
-# Another uninteresting files
+# Other uninteresting files
+*~
 *.out
 *.sds
 *.pdf
