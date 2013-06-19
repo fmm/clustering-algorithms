@@ -1,26 +1,17 @@
 [class_variable] 1
-[initialization_number] 5
-[maximum_iteration_number] 350
+[initialization_number] 10
+[maximum_iteration_number] 100
 
-[cluster_number] 3
-[prototype_number] 1 18
+[cluster_number] 15
+[prototype_number] 5
 [magic] 0
 
-[repeat] 5
-[label] 0.0
-[alpha] 9.9
-[automatic_alpha] True
-
-[prototype_number_begin] 1
-[prototype_number_end] 10
-
-[magic_begin] 0
-[magic_end] 10
+[repeat] 1
+[label] 0.1
+[alpha] 4.9
+[automatic_alpha] False
 
 [output] main.tex
 
 [input]
-input/iris/Iris-f[pow]_var[1].sds
-input/iris/Iris-f[pow]_var[2].sds
-input/iris/Iris-f[pow]_var[3].sds
-input/iris/Iris-f[pow]_var[4].sds
+Libras.sds

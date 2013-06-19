@@ -21,7 +21,7 @@ typedef long double long_double;
 #define double long_double
 
 const double eps = 1e-7;
-const int inf = ~0u>>1;
+const int inf = ~0u>>2;
 const unsigned long long TLE = 60 * 60000000ULL; // minutes
 const double max_alpha = 1e3;
 
@@ -398,6 +398,25 @@ vector< Matrix > table;
 bool automatic_alpha;
 
 struct Scanner {  
+	struct Item {
+		vector< pair<double,double> > v; // #p
+		unsigned int size() {
+		  return v.size();
+		}
+		pair<double,double>& operator[](int n) {
+			 return v[n];
+		}
+		void add(string s) {
+			double x, y;
+			rep(i,s.size()) if(s[i]=='('||s[i]==':'||s[i]==')') s[i]=' ';
+			stringstream ss(s);
+			assert(ss >> x >> y);
+			assert(x==x);
+			assert(y==y);
+			v.push_back( pair<double,double>(x,y) );
+		}	
+	};
+	vector<Item> data;
   Scanner(string config) {
     M.clear();
     ifstream in(config.c_str(), ios::in);
@@ -413,28 +432,55 @@ struct Scanner {
     P = Util::cast<int>(M["[prototype_number]"][0]);
     alpha = Util::cast<double>(M["[alpha]"][0]);
     label = Util::cast<double>(M["[label]"][0]);
+    automatic_alpha = M.count("[automatic_alpha]") && M["[automatic_alpha]"][0] == string("True");
     file = M["[input]"];
-    T = file.size();
-    read_individual_number_and_priori_cluster(file[0]);
+  }
+  void prepare_regular_sds() {
+    // read the number of individuals
+    read_individual_number(file[0]);
     M["[individual_number]"].push_back(Util::cast<string>(N));
+    // read the data and the priori clusters
+    read_data_and_priori_cluster(file[0]);
+    // read the tables
+    T = file.size();
     table = vector< Matrix >(T, Matrix(N, Row(N,0.0)));
     rep(i,T) read_table(file[i], table[i]);
-    automatic_alpha = M.count("[automatic_alpha]") && M["[automatic_alpha]"][0] == string("True");
   }
-  void read_individual_number_and_priori_cluster(string file_name) {
+  void prepare_simple_sds() {
+    // read the data from the RECTANGLE_MATRIX
+    assert(file.size() == 1);
+    read_data_and_priori_cluster(file[0]);
+    N=data.size();
+    M["[individual_number]"].push_back(Util::cast<string>(N));
+    // generate a table for each variable
+    T=data[0].size();
+    table = vector< Matrix >(T, Matrix(N, Row(N,0.0)));
+    rep(i,T) {
+      vector< pair<double,double> > var(N);
+      rep(j,N) var[j]=data[j][i];
+      generate_dissimilarities(var, table[i]);
+    }
+  }
+  void read_individual_number(string file_name) {
     ifstream in(file_name.c_str(), ios::in);
     assert(in);
     string line;
     do if(!getline(in,line)) assert(0); while(line.find("indiv_nb") == string::npos);
     assert(sscanf(line.c_str()," indiv_nb = %d", &N) == 1);
+  }
+  void read_data_and_priori_cluster(string file_name) {
+    ifstream in(file_name.c_str(), ios::in);
+    assert(in);
+    string line;
     do if(!getline(in,line)) assert(0); while(line.find("RECTANGLE_MATRIX = (") == string::npos);
     priori_cluster.clear();
-    rep(i,N) {
+    data.clear();
+    for(int i=0;;++i) {
       line.clear();
       char c;
       int ct = 0;
       while(ct == 0) {
-        assert(in>>c);
+        if(!(in>>c)) goto finalize;
         if(c == '(') ct++;
       }
       while(ct != 0) {
@@ -443,27 +489,28 @@ struct Scanner {
         if(ct != 0) line.push_back(c);
       }
       line.push_back(',');
-      ct = 0;
-      rep(j,line.size()) if(line[j] != ' ') line[ct++] = line[j];
-      line.resize(ct);
-      string piece;
-      vector< string > v;
-      ct = 0;
-      rep(j,line.size()) {
-        if(line[j] == '(') ct++; else if(line[j] == ')') ct--;
-        piece.push_back(line[j]);
-        if(ct == 0) {
-          if(piece[0] == ',') piece.clear();
-          else if(line[j+1] == ',') v.push_back(piece);
-        }
-      }
-      piece = v[class_variable - 1];
-      unsigned int priori;
-      assert(sscanf(piece.c_str(),"%u",&priori) == 1);
-      while(priori > priori_cluster.size()) priori_cluster.push_back(Cluster());
-      priori_cluster[priori - 1].insert(i);
+			vector<string> var;
+			string piece;
+			rep(j,line.size()) if(line[j] != ' ') {
+				if (line[j] == '(') ct++; else if (line[j] == ')') ct--;
+				if(!ct && line[j] == ',') {
+					var.push_back(piece), piece.clear();
+				} else piece.push_back(line[j]);
+			}
+			Item item;
+			unsigned int priori;
+			rep(j,var.size()) {
+			  if(j != class_variable-1) {
+			    item.add(var[j]);
+			  } else {
+			    assert(sscanf(var[j].c_str(),"%u",&priori) == 1);
+			  }
+			}
+		  while(priori > priori_cluster.size()) priori_cluster.push_back(Cluster());
+		  priori_cluster[priori - 1].insert(i);
+			data.push_back(item);
     }
-    in.close();
+    finalize: in.close();
   }
   void read_table(string file_name, Matrix& M) {
     ifstream in(file_name.c_str(), ios::in);
@@ -484,6 +531,12 @@ struct Scanner {
       }
     }
     in.close();
+  }
+  void generate_dissimilarities(vector< pair<double,double> >&var, Matrix& M) {
+    rep(i,N) rep(j,N) {
+      M[i][j]=pow(var[i].first-var[j].first,2.0)+pow(var[i].second-var[j].second,2.0);
+      assert(M[i][j]==M[i][j]);
+    }
   }
   void generate_restrictions() {
     must_link.clear();
@@ -1401,11 +1454,14 @@ namespace Generator {
 };
 
 int main() {
+	assert(inf>0);
   seed = time(NULL);
   MersenneTwister::build(seed);
   dbg(seed);
-  Scanner scan("config");
-  if(false) {
+  // TODO: config file should be arg[0]
+	Scanner scan("config");
+  // TODO: change for #ifdef something...
+	if(false) {
     Generator::prepare();
     if(true){
       ofstream out("data.in");
@@ -1416,6 +1472,12 @@ int main() {
     }
     if(false) return 0;
   }
+	// TODO: change for #ifdef something...
+	if(true) {
+		scan.prepare_simple_sds();
+	} else {
+	  scan.prepare_regular_sds();
+	}
   string out = M["[output]"][0];
   ofstream out_file(out.c_str(),ios::out);
   Latex latex(out_file);
