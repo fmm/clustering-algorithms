@@ -1,0 +1,120 @@
+% Copyright 2013 by Filipe Martins <fmm@cin.ufpe.br>
+% This file can be redistributed and/or modified under the terms of the GNU Public License, version 2
+%
+% wfb 2013 conference
+% talk lenght: about 15 minutes
+
+\documentclass{beamer}
+
+\mode<presentation>
+{
+	\usetheme{Warsaw}
+}
+
+\usepackage{verbatim}
+
+\usepackage[english]{babel}
+
+\usepackage{amsmath}
+
+\usepackage{pgfplots}
+\usepackage{cite,graphics,graphicx}
+
+\usepackage{float}
+\usepackage[tight,footnotesize]{subfigure}
+
+% set maximum depth to 9 for itemize
+\usepackage{enumitem}
+\setlistdepth{9}
+\setlist[itemize,1]{label=$\bullet$}
+\setlist[itemize,2]{label=$\bullet$}
+\setlist[itemize,3]{label=$\bullet$}
+\setlist[itemize,4]{label=$\bullet$}
+\setlist[itemize,5]{label=$\bullet$}
+\setlist[itemize,6]{label=$\bullet$}
+\setlist[itemize,7]{label=$\bullet$}
+\setlist[itemize,8]{label=$\bullet$}
+\setlist[itemize,9]{label=$\bullet$}
+\renewlist{itemize}{itemize}{9}
+
+\title[Semi-supervised fuzzy c-medoids clustering algorithm]{Semi-supervised fuzzy c-medoids clustering algorithm with multiple prototype representation}
+
+\author{
+	Filipe M. de Melo\inst{1} \and Francisco de A.T. de Carvalho\inst{1}
+}
+
+\institute{
+	Center of Informatics\\
+	Federal University of Pernambuco
+}
+
+\date[fuzzIEEE 2013]{2013 IEEE International Conference on Fuzzy Systems}
+
+\subject{Machine Learning}
+
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>{Outline}
+		\tableofcontents[currentsection,currentsubsection]
+	\end{frame}
+}
+
+% begin
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+	\tableofcontents
+\end{frame}
+
+% introduction goes here
+\section{Introduction}
+\subsection{Motivation}
+\subsection{Semi-supervised Clustering}
+
+% ss-clamp goes here
+\section{Proposed Algorithm}
+
+%
+\subsection{Details}
+%% Parameters
+%% Objective Function
+
+% described the parameters used in the clustering process
+\begin{frame}{Parameters}
+\begin{itemize}
+\item{$E=\{e_{1},\ldots,e_{N}\}$}
+\item{$D_{j} = [d_{j}(e_{i},e_{l})]\,(j=1,\ldots,T)$}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Objective Function}
+% objective function
+\begin{eqnarray*}
+  % adequacy criterion to produce a consensus clustering
+  J&{}=
+  \pause
+  {}&\sum_{i=1}^{N}\sum_{k=1}^{C}(u_{ik})^{2}\sum_{j=1}^{T}\lambda_{kj}\sum_{e \in G_{k}}d_{j}(e_{i},e)\\
+  \pause
+  % pairwise constraints
+  &&{+}\:\alpha\left (\sum_{(l,m)\in\mathcal{M}}\sum_{r=1}^{C}\sum_{\substack{s=1 \\{s}\neq{r}}}^{C}u_{lr}u_{ms}+\sum_{(l,m)\in\mathcal{C}}\sum_{r=1}^{C}u_{lr}u_{mr}\right )
+\end{eqnarray*}
+  \pause
+subject to
+% membership restrictions (fuzzy)
+\begin{displaymath}
+  u_{ik} \geq 0\qquad\sum_{k=1}^{C}u_{ik} = 1\qquad\forall i
+\end{displaymath}
+% relevance weight restrictions
+\begin{displaymath}
+  \lambda_{kj} > 0\qquad\prod_{j=1}^{T}\lambda_{kj} = 1\qquad\forall k.
+\end{displaymath}
+\end{frame}
+
+% experiments goes here
+
+% end
+\end{document}
