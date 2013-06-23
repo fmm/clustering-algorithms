@@ -14,6 +14,7 @@
 #include <sys/time.h>
 #define rep(x,n) for(int x = 0; x < int(n); ++x)
 #define dbg(x) cerr << #x << " = " << x << endl
+#define pv(x,y) {for(typeof(y) z=(x);z!=(y);z++)cerr<<*z<<" ";cerr<<endl;}
 #define _ << " , " <<
 using namespace std;
 
@@ -90,10 +91,6 @@ namespace Util {
   }
   template<class T> T square(T x) {
     return x * x;
-  }
-  template<class T> void pv(T a, T b, ostream& out = cerr) {
-    for (T i = a; i != b; ++i) out << *i << " ";
-    out << endl;
   }
   template<class S, class T> S cast(T a) {
     stringstream s;
@@ -434,6 +431,7 @@ struct Scanner {
     label = Util::cast<double>(M["[label]"][0]);
     automatic_alpha = M.count("[automatic_alpha]") && M["[automatic_alpha]"][0] == string("True");
     file = M["[input]"];
+		N=-1;
   }
   void prepare_regular_sds() {
     // read the number of individuals
@@ -467,20 +465,20 @@ struct Scanner {
     string line;
     do if(!getline(in,line)) assert(0); while(line.find("indiv_nb") == string::npos);
     assert(sscanf(line.c_str()," indiv_nb = %d", &N) == 1);
-  }
+	}
   void read_data_and_priori_cluster(string file_name) {
     ifstream in(file_name.c_str(), ios::in);
     assert(in);
     string line;
     do if(!getline(in,line)) assert(0); while(line.find("RECTANGLE_MATRIX = (") == string::npos);
-    priori_cluster.clear();
+		priori_cluster.clear();
     data.clear();
     for(int i=0;;++i) {
       line.clear();
       char c;
       int ct = 0;
       while(ct == 0) {
-        if(!(in>>c)) goto finalize;
+        if(!(in>>c) || isalpha(c)) goto finalize;
         if(c == '(') ct++;
       }
       while(ct != 0) {
@@ -503,7 +501,7 @@ struct Scanner {
 			  if(j != class_variable-1) {
 			    item.add(var[j]);
 			  } else {
-			    assert(sscanf(var[j].c_str(),"%u",&priori) == 1);
+					assert(sscanf(var[j].c_str(),"%u",&priori) == 1);
 			  }
 			}
 		  while(priori > priori_cluster.size()) priori_cluster.push_back(Cluster());
@@ -1473,7 +1471,7 @@ int main() {
     if(false) return 0;
   }
 	// TODO: change for #ifdef something...
-	if(true) {
+	if(false) {
 		scan.prepare_simple_sds();
 	} else {
 	  scan.prepare_regular_sds();
