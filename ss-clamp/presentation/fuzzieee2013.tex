@@ -119,6 +119,10 @@
 	\item{Must-link: both points in the pair should be placed in the same group}
 	\item{Cannot-link: indicates that two points should belong to different groups}
 	\end{itemize}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.81\textwidth]{image/pairwise-restrictions.jpg}
+	\end{figure}
 \end{frame}
 
 % ss-clamp goes here
@@ -129,6 +133,7 @@
 %% Parameters
 %% Objective Function
 
+\begin{comment}
 % described the parameters used in the clustering process
 \begin{frame}{Parameters}
 %TODO organize in categories
@@ -152,6 +157,7 @@
 \item{$e_{l}\,\text{cannot-link}\,e_{m} \implies (l,m) \in \mathcal{C}$}
 \end{itemize}
 \end{frame}
+\end{comment}
 
 \begin{frame}{Objective Function}
 % objective function
@@ -176,9 +182,11 @@ subject to
 \end{displaymath}
 \end{frame}
 
+\subsection{Pseudocode}
+
+% step 0:
 % a random set of distinct prototypes is assigned to each cluster producing the initial partition, and the value of the relevance is set to be initially 1.0
-\begin{frame}{Step 0:}
-\end{frame}
+%
 
 \begin{frame}{Step 1: selection of the prototypes}
 	%TODO: more details
@@ -218,7 +226,7 @@ subject to
 		\item{To ensure non-negative values to the $u_{ik}$ membership Kuhn and Tucker conditions were used}
 		% similar to the FANNY algorithm
 	\end{itemize}
-\begin{equation*}
+\begin{displaymath}
 \begin{split}
 L&
 =
@@ -249,20 +257,19 @@ s=1 \\ {s}\neq{r}
 \sum_{i=1}^{N}
 \sum_{k=1}^{C}\psi_{ik}u_{ik}
 \end{split}
-\end{equation*}
+\end{displaymath}
 \end{frame}
 
-%TODO loop
-\begin{frame}{Step 3: computation of the membership degree (Cont...)}
-\begin{equation*}
+\begin{frame}{Step 3: computation of the membership degree}
+\begin{displaymath}
 \label{membership-equation}
 u_{ik} =\frac{\gamma_{i} - b_{ik}}{a_{ik}}
-\end{equation*}
+\end{displaymath}
 where
-\begin{equation*}
+\begin{displaymath}
 \label{gamma-equation}
 \gamma_{i}=\frac{1+\sum_{w \in {V_{i}}}(\frac{b_{iw}}{a_{iw}})}{\sum_{w \in {V_{i}}}(\frac{1}{a_{iw}})}
-\end{equation*}
+\end{displaymath}
 and
 \begin{displaymath}
 a_{ik}=2\sum_{j=1}^{T}\lambda_{kj}\sum_{e \in g_{k}}d_{j}(e_{i},e)
@@ -273,8 +280,8 @@ b_{ik}=\alpha\left(\sum_{(i,m)\in\mathcal{M}}\sum_{\substack{s=1\\{s}\neq{k}}}^{
 \end{frame}
 
 \begin{frame}{Proof}
-Using the Lagrange multipliers we have the following equation:
-\begin{equation*}
+Using the Lagrange multipliers we have the equation below:
+\begin{displaymath}
 \begin{split}
 L&
 =
@@ -305,9 +312,9 @@ s=1 \\ {s}\neq{r}
 \sum_{i=1}^{N}
 \sum_{k=1}^{C}\psi_{ik}u_{ik}
 \end{split}
-\end{equation*}
+\end{displaymath}
 Calculating the derivative with respect to $u_{ik}$:
-\begin{equation}
+\begin{displaymath}
 \frac{\partial{L}}{\partial{u_{ik}}}
 =
 u_{ik}a_{ik}
@@ -317,25 +324,25 @@ b_{ik}
 \gamma_{i}
 -
 \psi_{ik}
-\end{equation}
+\end{displaymath}
 \end{frame}
 
 \begin{frame}{Proof}
 Using the Kuhn-Tucker conditions we have the following restriction to deal with:
-\begin{gather}
+\begin{gather*}
 \psi_{ik} \geq 0 \\
 \frac{\partial{L}}{\partial{u_{ik}}} = 0 \\
 u_{ik} \psi_{ik} = 0
-\end{gather}
+\end{gather*}
 Analyzing these restrictions we can notice that there're only two possibilities:
-\begin{gather}
+\begin{gather*}
 \psi_{ik} = 0 \implies  u_{ik} \geq 0 \\
 \psi_{ik} > 0 \implies  u_{ik} = 0
-\end{gather}
+\end{gather*}
 \end{frame}
 
 \begin{frame}{Proof}
-\begin{equation}
+\begin{displaymath}
 \gamma_{i} = 
 \frac
 {
@@ -359,14 +366,14 @@ Analyzing these restrictions we can notice that there're only two possibilities:
 {a_{iw}}
 \right )
 }
-\end{equation}
+\end{displaymath}
 and
-\begin{equation}
+\begin{displaymath}
 u_{ik} =
 \frac
 {\gamma{i} + \psi_{ik} - b_{ik}}
 {a_{ik}}
-\end{equation}
+\end{displaymath}
 So, if we consider that $\psi_{ik} = 0$ and we get $u_{ik} < 0$ we can conclude that $u_{ik}$ must be $0$.
 \end{frame}
 
@@ -396,17 +403,22 @@ So, if we consider that $\psi_{ik} = 0$ and we get $u_{ik} < 0$ we can conclude 
 \end{itemize}
 \end{frame}
 
+\subsection{Optimizations}
+
 \begin{frame}{Choice of $\alpha$}
-\begin{equation*}
+\begin{displaymath}
 \label{restriction-equation}
 good(\alpha)=
 \left[
 \sum_{(l,m)\in\mathcal{M}}\sum_{r=1}^{C}\sum_{\substack{s=1\\{s}\neq{r}}}^{C}u_{lr}u_{ms}+\sum_{(l,m)\in\mathcal{C}}\sum_{r=1}^{C}u_{lr}u_{mr}
 \leq \epsilon
 \right]
-\end{equation*}
+\end{displaymath}
 \begin{itemize}
-\item{hypothesis: $good(x) \implies good(y) \quad \forall y \geq x$ is true}
+\item{Hypothesis: $good(x) \implies good(y) \quad \forall y \geq x$ is true}
+\pause
+% this approach leads to a efficient algorithm, (O(log(range))
+\item{Approximated solution: just binary search $\alpha$ using some range}
 \end{itemize}
 \end{frame}
 
