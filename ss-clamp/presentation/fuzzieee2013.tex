@@ -435,298 +435,396 @@ good(\alpha)=
 % experiments goes here
 \section{Experiments}
 
+\subsection{Methodology}
+
+%
+% This was the setup of the tests
+%
+\begin{frame}{Setup}
+	\begin{itemize}
+		\item{Run 100 times to get the best result (based on the criterion function)}
+		\item{Confidence interval of 95\%}
+		\item{Maximum number of iterations was set to 350}
+		\item{$\alpha$ search range was set to $[0,10^{5}]$}
+		\item{Known labeled data to generate restrictions were chosen randomly}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Accuracy Rate}
+	\begin{itemize}
+		\item{Given hard clusters $P=\{P_{1},\ldots,P_{k},\ldots,P_{C}\}$ and $Q=\{Q_{1},\ldots,Q_{l},\ldots,Q_{C}\}$}
+		\item{Best matching on the confusion matrix}
+	\end{itemize}
+	\begin{displaymath}
+		AR=\frac{\sum_{k=1}^{C}\sum_{l=1}^{C}{y_{kl}}{x_{kl}}}{N} \rightarrow Maximum
+	\end{displaymath}
+	\pause
+	subject to $\sum_{k=1}^{C}x_{kl}=1$, $\sum_{l=1}^{C}x_{kl}=1$ and $x_{kl} \in \{0,1\}$
+	%
+	% So, we have a flow network where the edge has capacity 1 and the cost is the value on the
+	% confusing matrix, compute the best matching correspond to a well-known problem (minimum
+	% cost maximum flow).
+	%
+	\pause
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.25\textwidth]{image/graph.jpg}
+	\end{figure}
+\end{frame}
+
 \subsection{Wine Data Set}
 
+\begin{frame}{Description}
+	\begin{itemize}
+		% these wines come from Italy
+		\item{178 samples from three typed of wines}
+		% Their attributes were based in a description of their chemical components
+		\item{Each wine is described by 13 real-valued atributes}
+		\begin{itemize}
+			\item{(1) alcohol, (2) malic acid, (3) ash, (4) alkalinity of ash, (5) magnesium, (6) total phenols, (7) flavonoids, (8) non-flavonoid phenols, (9) proanthocyanins, (10) colour intensity, (11) hue, (12) OD280/OD315 of diluted wines, and (13) proline}
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+% custom color list
+\pgfplotscreateplotcyclelist{my_color_list}{%
+	blue,every mark/.append style={fill=blue!80!black},mark=*\\%
+	red,every mark/.append style={fill=red!80!black},mark=square*\\%
+	gray,every mark/.append style={fill=gray!80!black},mark=otimes*\\%
+	%brown,every mark/.append style={fill=brown!80!black},mark=diamond*\\%
+	cyan,densely dashed,every mark/.append style={solid,fill=cyan!80!black},mark=diamond*\\%
+	violet,densely dashed,every mark/.append style={solid,fill=violet!80!black},mark=square*\\%
+}
+
+%
+% One of the biggest advantange of this value be auto-computed is the fact
+% that it could be hard to find a suitable value for one data set, this is
+% true because it value depends of the data set, the restrictions and the
+% objective. The experiments show us a good perfomance while testing different
+% values of alpha.
+%
+
 \begin{frame}{Analysis of $\alpha$}
-\begin{figure}
-	\centering
-	\begin{tikzpicture}
-		\begin{axis}
-		[
-			yticklabel style={/pgf/number format/fixed,/pgf/number format/precision=3},
-			ylabel={Accuracy},
-			xlabel={Number of prototypes},
-			grid=major,
-			%height=7cm,
-			%width=7cm,
-			legend style={
-				cells={anchor=east},
-				%legend pos=south east,
-				legend pos=outer north east,
-			}
-		]
-		\addplot+[mark=*,error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(1,93.8202) +- (0,0)
-			(2,93.8202) +- (0,0)
-			(3,93.8202) +- (0,0)
-			(4,93.2584) +- (0,0)
-			(5,94.382) +- (0,0)
-			(6,93.2584) +- (0,0)
-			(7,92.6966) +- (0,0)
-			(8,93.8202) +- (0,0)
-			(9,91.573) +- (0,0)
-			(10,89.8878) +- (0,0.0002)
-		};
-		\addlegendentry{auto}
+	\begin{figure}
+		\centering
+		\begin{tikzpicture}
+			\begin{axis}
+			[
+				%stack plots=y,stack dir=minus,
+				cycle list name=my_color_list,
+				yticklabel style={/pgf/number format/fixed,/pgf/number format/precision=3},
+				ylabel={Accuracy},
+				xlabel={Number of prototypes},
+				grid=major,
+				%height=7cm,
+				%width=7cm,
+				legend style={
+					cells={anchor=east},
+					%legend pos=south east,
+					legend pos=outer north east,
+				}
+			]
+			\addplot+[error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(1,93.8202) +- (0,0)
+				(2,93.8202) +- (0,0)
+				(3,93.8202) +- (0,0)
+				(4,93.2584) +- (0,0)
+				(5,94.382) +- (0,0)
+				(6,93.2584) +- (0,0)
+				(7,92.6966) +- (0,0)
+				(8,93.8202) +- (0,0)
+				(9,91.573) +- (0,0)
+				(10,89.8878) +- (0,0.0002)
+			};
+			\addlegendentry{auto}
 
-		\addplot+[mark=x,error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(1,90.4494) +- (0,0)
-			(2,93.2584) +- (0,0)
-			(3,92.6966) +- (0,0)
-			(4,91.573) +- (0,0)
-			(5,92.6966) +- (0,0)
-			(6,91.573) +- (0,0)
-			(7,92.1348) +- (0,0)
-			(8,90.4494) +- (0,0)
-			(9,91.573) +- (0,0)
-			(10,91.0112) +- (0,0)
-		};
-		\addlegendentry{0.25}	
+			\/*
+			% commented
+			\addplot+[error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(1,90.4494) +- (0,0)
+				(2,93.2584) +- (0,0)
+				(3,92.6966) +- (0,0)
+				(4,91.573) +- (0,0)
+				(5,92.6966) +- (0,0)
+				(6,91.573) +- (0,0)
+				(7,92.1348) +- (0,0)
+				(8,90.4494) +- (0,0)
+				(9,91.573) +- (0,0)
+				(10,91.0112) +- (0,0)
+			};
+			\addlegendentry{0.25}
+			*/
 
-		\/*
-		\addplot+[error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(1,90.4494) +- (0,0)
-			(2,92.6966) +- (0,0)
-			(3,92.6966) +- (0,0)
-			(4,91.573) +- (0,0)
-			(5,92.6966) +- (0,0)
-			(6,91.573) +- (0,0)
-			(7,91.0112) +- (0,0)
-			(8,90.4494) +- (0,0)
-			(9,91.0112) +- (0,0)
-			(10,91.0112) +- (0,0)
-		};
-		\addlegendentry{0.50}
-		*/
+			\/*
+			% commented
+			\addplot+[error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(1,90.4494) +- (0,0)
+				(2,92.6966) +- (0,0)
+				(3,92.6966) +- (0,0)
+				(4,91.573) +- (0,0)
+				(5,92.6966) +- (0,0)
+				(6,91.573) +- (0,0)
+				(7,91.0112) +- (0,0)
+				(8,90.4494) +- (0,0)
+				(9,91.0112) +- (0,0)
+				(10,91.0112) +- (0,0)
+			};
+			\addlegendentry{0.50}
+			*/
 
-		\addplot+[mark=|,error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(1,90.4494) +- (0,0)
-			(2,93.2584) +- (0,0)
-			(3,92.6966) +- (0,0)
-			(4,91.573) +- (0,0)
-			(5,92.1348) +- (0,0)
-			(6,91.573) +- (0,0)
-			(7,91.0112) +- (0,0)
-			(8,91.0112) +- (0,0)
-			(9,91.0112) +- (0,0)
-			(10,91.0112) +- (0,0)
-		};
-		\addlegendentry{1.00}
+			\addplot+[error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(1,90.4494) +- (0,0)
+				(2,93.2584) +- (0,0)
+				(3,92.6966) +- (0,0)
+				(4,91.573) +- (0,0)
+				(5,92.1348) +- (0,0)
+				(6,91.573) +- (0,0)
+				(7,91.0112) +- (0,0)
+				(8,91.0112) +- (0,0)
+				(9,91.0112) +- (0,0)
+				(10,91.0112) +- (0,0)
+			};
+			\addlegendentry{1.00}
 
-		\/*
-		\addplot+[error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(1,90.4494) +- (0,0)
-			(2,93.8202) +- (0,0)
-			(3,93.2584) +- (0,0)
-			(4,92.1348) +- (0,0)
-			(5,92.6966) +- (0,0)
-			(6,91.573) +- (0,0)
-			(7,91.0112) +- (0,0)
-			(8,91.0112) +- (0,0)
-			(9,91.573) +- (0,0)
-			(10,91.0112) +- (0,0)
-		};
-		\addlegendentry{2.00}
-		*/
+			\/*
+			% commented
+			\addplot+[error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(1,90.4494) +- (0,0)
+				(2,93.8202) +- (0,0)
+				(3,93.2584) +- (0,0)
+				(4,92.1348) +- (0,0)
+				(5,92.6966) +- (0,0)
+				(6,91.573) +- (0,0)
+				(7,91.0112) +- (0,0)
+				(8,91.0112) +- (0,0)
+				(9,91.573) +- (0,0)
+				(10,91.0112) +- (0,0)
+			};
+			\addlegendentry{2.00}
+			*/
 
-		\addplot+[mark=o,error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(1,93.2584) +- (0,0)
-			(2,93.2584) +- (0,0)
-			(3,93.8202) +- (0,0)
-			(4,92.1348) +- (0,0)
-			(5,92.1348) +- (0,0)
-			(6,91.573) +- (0,0)
-			(7,91.0112) +- (0,0)
-			(8,91.0112) +- (0,0)
-			(9,91.573) +- (0,0)
-			(10,91.0112) +- (0,0)
-		};
-		\addlegendentry{4.00}
+			\addplot+[error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(1,93.2584) +- (0,0)
+				(2,93.2584) +- (0,0)
+				(3,93.8202) +- (0,0)
+				(4,92.1348) +- (0,0)
+				(5,92.1348) +- (0,0)
+				(6,91.573) +- (0,0)
+				(7,91.0112) +- (0,0)
+				(8,91.0112) +- (0,0)
+				(9,91.573) +- (0,0)
+				(10,91.0112) +- (0,0)
+			};
+			\addlegendentry{4.00}
 
-		\/*
-		\addplot+[error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(1,93.8202) +- (0,0)
-			(2,93.8202) +- (0,0)
-			(3,92.6966) +- (0,0)
-			(4,92.6966) +- (0,0)
-			(5,92.1348) +- (0,0)
-			(6,92.1348) +- (0,0)
-			(7,91.0112) +- (0,0)
-			(8,91.0112) +- (0,0)
-			(9,91.573) +- (0,0)
-			(10,92.1348) +- (0,0)
-		};
-		\addlegendentry{8.00}
-		*/
+			\/*
+			% commented
+			\addplot+[error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(1,93.8202) +- (0,0)
+				(2,93.8202) +- (0,0)
+				(3,92.6966) +- (0,0)
+				(4,92.6966) +- (0,0)
+				(5,92.1348) +- (0,0)
+				(6,92.1348) +- (0,0)
+				(7,91.0112) +- (0,0)
+				(8,91.0112) +- (0,0)
+				(9,91.573) +- (0,0)
+				(10,92.1348) +- (0,0)
+			};
+			\addlegendentry{8.00}
+			*/
 
-		\addplot+[color=green,error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(1,93.8202) +- (0,0)
-			(2,93.2584) +- (0,0)
-			(3,92.6966) +- (0,0)
-			(4,92.1348) +- (0,0)
-			(5,92.1348) +- (0,0)
-			(6,91.573) +- (0,0)
-			(7,91.573) +- (0,0)
-			(8,91.0112) +- (0,0)
-			(9,92.1348) +- (0,0)
-			(10,91.573) +- (0,0)
-		};
-		\addlegendentry{16.00}
+			\addplot+[error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(1,93.8202) +- (0,0)
+				(2,93.2584) +- (0,0)
+				(3,92.6966) +- (0,0)
+				(4,92.1348) +- (0,0)
+				(5,92.1348) +- (0,0)
+				(6,91.573) +- (0,0)
+				(7,91.573) +- (0,0)
+				(8,91.0112) +- (0,0)
+				(9,92.1348) +- (0,0)
+				(10,91.573) +- (0,0)
+			};
+			\addlegendentry{16.00}
 
-		\/*
-		\addplot+[error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(1,93.8202) +- (0,0)
-			(2,92.6966) +- (0,0)
-			(3,92.6966) +- (0,0)
-			(4,92.1348) +- (0,0)
-			(5,94.382) +- (0,0)
-			(6,92.1348) +- (0,0)
-			(7,93.2584) +- (0,0)
-			(8,91.573) +- (0,0)
-			(9,92.1348) +- (0,0)
-			(10,93.2584) +- (0,0)
-		};
-		\addlegendentry{32.00}
-		*/
+			\/*
+			% commented
+			\addplot+[error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(1,93.8202) +- (0,0)
+				(2,92.6966) +- (0,0)
+				(3,92.6966) +- (0,0)
+				(4,92.1348) +- (0,0)
+				(5,94.382) +- (0,0)
+				(6,92.1348) +- (0,0)
+				(7,93.2584) +- (0,0)
+				(8,91.573) +- (0,0)
+				(9,92.1348) +- (0,0)
+				(10,93.2584) +- (0,0)
+			};
+			\addlegendentry{32.00}
+			*/
 
-		\addplot+[color=yellow,error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(1,93.8202) +- (0,0)
-			(2,92.6966) +- (0,0)
-			(3,91.573) +- (0,0)
-			(4,92.6966) +- (0,0)
-			(5,92.6966) +- (0,0)
-			(6,94.382) +- (0,0)
-			(7,93.2584) +- (0,0)
-			(8,91.573) +- (0,0)
-			(9,92.6966) +- (0,0)
-			(10,93.8202) +- (0,0)
-		};
-		\addlegendentry{64.00}
+			\addplot+[error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(1,93.8202) +- (0,0)
+				(2,92.6966) +- (0,0)
+				(3,91.573) +- (0,0)
+				(4,92.6966) +- (0,0)
+				(5,92.6966) +- (0,0)
+				(6,94.382) +- (0,0)
+				(7,93.2584) +- (0,0)
+				(8,91.573) +- (0,0)
+				(9,92.6966) +- (0,0)
+				(10,93.8202) +- (0,0)
+			};
+			\addlegendentry{64.00}
 
-		\/*
-		\addplot+[error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(1,93.8202) +- (0,0)
-			(2,93.8202) +- (0,0)
-			(3,95.5056) +- (0,0)
-			(4,92.1348) +- (0,0)
-			(5,92.1348) +- (0,0)
-			(6,92.6966) +- (0,0)
-			(7,93.8202) +- (0,0)
-			(8,93.8202) +- (0,0)
-			(9,91.573) +- (0,0)
-			(10,89.8876) +- (0,0)
-		};
-		\addlegendentry{128.00}
-		*/
+			\/*
+			% commented
+			\addplot+[error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(1,93.8202) +- (0,0)
+				(2,93.8202) +- (0,0)
+				(3,95.5056) +- (0,0)
+				(4,92.1348) +- (0,0)
+				(5,92.1348) +- (0,0)
+				(6,92.6966) +- (0,0)
+				(7,93.8202) +- (0,0)
+				(8,93.8202) +- (0,0)
+				(9,91.573) +- (0,0)
+				(10,89.8876) +- (0,0)
+			};
+			\addlegendentry{128.00}
+			*/
 
-		\end{axis}
-	\end{tikzpicture}
-\end{figure}
+			\end{axis}
+		\end{tikzpicture}
+	\end{figure}
 \end{frame}
 
 \subsection{Iris Data Set}
 
+\begin{frame}{Description}
+	\begin{itemize}
+		\item{50 instances for each one of the three species}
+		\begin{itemize}
+			\item{Iris Setosa}
+			\item{Iris Versicolour}
+			\item{Iris Virginica}
+		\end{itemize}
+		% The size of the sepals and petals are among the best diagnostic
+		% for these three species of iris flowers. (annals of the Missouri
+		% Botanical Garden)
+		\item{Four attributes for each object}
+		\begin{itemize}
+			\item{Sepal length}
+			\item{Sepal width}
+			\item{Petal length}
+			\item{Petal width}
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
 \begin{frame}{Analysis of Self Training}
-\begin{figure}
-  \centering
-	\begin{tikzpicture}
-		\begin{axis}
-		[
-			yticklabel style={/pgf/number format/fixed,/pgf/number format/precision=3},
-			ylabel={Accuracy},
-			xlabel={Number of prototypes},
-			grid=major,
-			%height=7cm,
-			%width=7cm,
-			legend style={
-				cells={anchor=east},
-				legend pos=south east,
-			}
-		]
-		% first
-		\addplot+[error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(1,0.956600) +- (0.000000,0.001116)
-			(2,0.955067) +- (0.000000,0.000730)
-			(3,0.956667) +- (0.000000,0.001132)
-			(4,0.957200) +- (0.000000,0.001559)
-			(5,0.955267) +- (0.000000,0.001756)
-			(6,0.955600) +- (0.000000,0.001398)
-			(7,0.953267) +- (0.000000,0.001518)
-			(8,0.955200) +- (0.000000,0.001802)
-			(9,0.954333) +- (0.000000,0.001906)
-			(10,0.956267) +- (0.000000,0.001298)
-			(11,0.955733) +- (0.000000,0.001037)
-			(12,0.956933) +- (0.000000,0.001299)
-			(13,0.958000) +- (0.000000,0.000915)
-			(14,0.959267) +- (0.000000,0.001196)
-			(15,0.957933) +- (0.000000,0.001088)
-			(16,0.959600) +- (0.000000,0.001106)
-			(17,0.963200) +- (0.000000,0.000914)
-			(18,0.964133) +- (0.000000,0.000920)
-			(19,0.963133) +- (0.000000,0.001036)
-			(20,0.959333) +- (0.000000,0.001190)
-			(21,0.957733) +- (0.000000,0.000946)
-			(22,0.958733) +- (0.000000,0.001040)
-			(23,0.958000) +- (0.000000,0.000969)
-			(24,0.957867) +- (0.000000,0.001010)
-			(25,0.958000) +- (0.000000,0.001070)
-	 	  %(26,95.8) +- (0,0.10695)
-			%(27,95.7667) +- (0,0.08341)
-			%(28,95.9067) +- (0,0.101245)
-			%(29,95.9133) +- (0,0.1072)
-			%(30,95.9133) +- (0,0.124855)
+	\begin{figure}
+		\centering
+		\begin{tikzpicture}
+			\begin{axis}
+			[
+				yticklabel style={/pgf/number format/fixed,/pgf/number format/precision=3},
+				ylabel={Accuracy},
+				xlabel={Number of prototypes},
+				grid=major,
+				%height=7cm,
+				%width=7cm,
+				legend style={
+					cells={anchor=east},
+					legend pos=south east,
+				}
+			]
+			% first
+			\addplot+[error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(1,0.956600) +- (0.000000,0.001116)
+				(2,0.955067) +- (0.000000,0.000730)
+				(3,0.956667) +- (0.000000,0.001132)
+				(4,0.957200) +- (0.000000,0.001559)
+				(5,0.955267) +- (0.000000,0.001756)
+				(6,0.955600) +- (0.000000,0.001398)
+				(7,0.953267) +- (0.000000,0.001518)
+				(8,0.955200) +- (0.000000,0.001802)
+				(9,0.954333) +- (0.000000,0.001906)
+				(10,0.956267) +- (0.000000,0.001298)
+				(11,0.955733) +- (0.000000,0.001037)
+				(12,0.956933) +- (0.000000,0.001299)
+				(13,0.958000) +- (0.000000,0.000915)
+				(14,0.959267) +- (0.000000,0.001196)
+				(15,0.957933) +- (0.000000,0.001088)
+				(16,0.959600) +- (0.000000,0.001106)
+				(17,0.963200) +- (0.000000,0.000914)
+				(18,0.964133) +- (0.000000,0.000920)
+				(19,0.963133) +- (0.000000,0.001036)
+				(20,0.959333) +- (0.000000,0.001190)
+				(21,0.957733) +- (0.000000,0.000946)
+				(22,0.958733) +- (0.000000,0.001040)
+				(23,0.958000) +- (0.000000,0.000969)
+				(24,0.957867) +- (0.000000,0.001010)
+				(25,0.958000) +- (0.000000,0.001070)
+				%(26,95.8) +- (0,0.10695)
+				%(27,95.7667) +- (0,0.08341)
+				%(28,95.9067) +- (0,0.101245)
+				%(29,95.9133) +- (0,0.1072)
+				%(30,95.9133) +- (0,0.124855)
 		};
-		\addlegendentry{yes}
-		%second
-		\addplot+[mark=triangle*,error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(1,0.949933) +- (0.000000,0.002175)
-			(2,0.945800) +- (0.000000,0.001926)
-			(3,0.942867) +- (0.000000,0.001716)
-			(4,0.952200) +- (0.000000,0.001664)
-			(5,0.951200) +- (0.000000,0.001567)
-			(6,0.950067) +- (0.000000,0.002045)
-			(7,0.950267) +- (0.000000,0.001933)
-			(8,0.947000) +- (0.000000,0.002182)
-			(9,0.948867) +- (0.000000,0.002308)
-			(10,0.951533) +- (0.000000,0.002106)
-			(11,0.951067) +- (0.000000,0.002634)
-			(12,0.954200) +- (0.000000,0.001996)
-			(13,0.958600) +- (0.000000,0.001399)
-			(14,0.957467) +- (0.000000,0.001277)
-			(15,0.958067) +- (0.000000,0.001493)
-			(16,0.959600) +- (0.000000,0.001223)
-			(17,0.959600) +- (0.000000,0.001026)
-			(18,0.958133) +- (0.000000,0.001030)
-			(19,0.957533) +- (0.000000,0.001088)
-			(20,0.958267) +- (0.000000,0.001133)
-			(21,0.957067) +- (0.000000,0.001034)
-			(22,0.954933) +- (0.000000,0.001421)
-			(23,0.955667) +- (0.000000,0.001448)
-			(24,0.954667) +- (0.000000,0.001307)
-			(25,0.955867) +- (0.000000,0.001342)
-			%(26,95.48) +- (0,0.17095)
-			%(27,95.38) +- (0,0.15707)
-			%(28,95.4667) +- (0,0.16215)
-			%(29,95.4867) +- (0,0.180915)
-			%(30,95.4133) +- (0,0.166595)
-		};
-		\addlegendentry{no}
-    \end{axis}
-	\end{tikzpicture}
-\end{figure}
+			\addlegendentry{yes}
+			%second
+			\addplot+[mark=triangle*,error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(1,0.949933) +- (0.000000,0.002175)
+				(2,0.945800) +- (0.000000,0.001926)
+				(3,0.942867) +- (0.000000,0.001716)
+				(4,0.952200) +- (0.000000,0.001664)
+				(5,0.951200) +- (0.000000,0.001567)
+				(6,0.950067) +- (0.000000,0.002045)
+				(7,0.950267) +- (0.000000,0.001933)
+				(8,0.947000) +- (0.000000,0.002182)
+				(9,0.948867) +- (0.000000,0.002308)
+				(10,0.951533) +- (0.000000,0.002106)
+				(11,0.951067) +- (0.000000,0.002634)
+				(12,0.954200) +- (0.000000,0.001996)
+				(13,0.958600) +- (0.000000,0.001399)
+				(14,0.957467) +- (0.000000,0.001277)
+				(15,0.958067) +- (0.000000,0.001493)
+				(16,0.959600) +- (0.000000,0.001223)
+				(17,0.959600) +- (0.000000,0.001026)
+				(18,0.958133) +- (0.000000,0.001030)
+				(19,0.957533) +- (0.000000,0.001088)
+				(20,0.958267) +- (0.000000,0.001133)
+				(21,0.957067) +- (0.000000,0.001034)
+				(22,0.954933) +- (0.000000,0.001421)
+				(23,0.955667) +- (0.000000,0.001448)
+				(24,0.954667) +- (0.000000,0.001307)
+				(25,0.955867) +- (0.000000,0.001342)
+				%(26,95.48) +- (0,0.17095)
+				%(27,95.38) +- (0,0.15707)
+				%(28,95.4667) +- (0,0.16215)
+				%(29,95.4867) +- (0,0.180915)
+				%(30,95.4133) +- (0,0.166595)
+			};
+			\addlegendentry{no}
+    	\end{axis}
+		\end{tikzpicture}
+	\end{figure}
 \end{frame}
 
 \subsection{Flower Data Set}
@@ -743,7 +841,7 @@ good(\alpha)=
 		\item{Flower vocabulary based on the petals of each flower}
 			\begin{itemize}
 				\item{Shape}
-				\item{Colour}
+				\item{Color}
 				\item{Texture pattern}
 			\end{itemize}
 		% crucial information about the species
@@ -751,83 +849,112 @@ good(\alpha)=
 \end{frame}
 
 \begin{frame}{SS-CLAMP x SS-CARD}
-\begin{figure}
-	\centering
-	\begin{tikzpicture}
-		\begin{axis}
-		[
-			ylabel=Accuracy,
-			xlabel=Labeled Data (Percentage),
-			grid=major,
-			legend style={
-				cells={anchor=west},
-				legend pos=north west,
-			}
-		]
-		\addplot+[error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(0,0.144412) +- (0.000000,0.004986)
-			(10,0.566471) +- (0.000000,0.012990)
-			(20,0.647353) +- (0.000000,0.010089)
-			(30,0.708971) +- (0.000000,0.008338)
-			(40,0.751912) +- (0.000000,0.007973)
-			(50,0.794118) +- (0.000000,0.004295)
-			(60,0.832206) +- (0.000000,0.006241)
-			(70,0.875294) +- (0.000000,0.004885)
-			(80,0.918088) +- (0.000000,0.002928)
-			(90,0.958382) +- (0.000000,0.003199)
-			(100,0.990000) +- (0.000000,0.000000)
-		};
-		\addlegendentry{SS\texttt{-}CLAMP}
-		\addplot+[mark=triangle*,error bars/.cd,y dir=both,y explicit]
-		coordinates {
-			(0,0.105882) +- (0.000000,0.000000)
-			(10,0.255882) +- (0.000000,0.011377)
-			(20,0.224559) +- (0.000000,0.010835)
-			(30,0.213824) +- (0.000000,0.015237)
-			(40,0.184559) +- (0.000000,0.041137)
-			(50,0.189412) +- (0.000000,0.020566)
-			(60,0.170147) +- (0.000000,0.016328)
-			(70,0.137941) +- (0.000000,0.023854)
-			(80,0.141471) +- (0.000000,0.030146)
-			(90,0.173382) +- (0.000000,0.062059)
-			(100,0.108088) +- (0.000000,0.002794)
-		};
-		\addlegendentry{SS\texttt{-}CARD}
-		\end{axis}
-	\end{tikzpicture}
-\end{figure}
+	\begin{figure}
+		\centering
+		\begin{tikzpicture}
+			\begin{axis}
+			[
+				ylabel=Accuracy,
+				xlabel=Labeled Data (Percentage),
+				grid=major,
+				legend style={
+					cells={anchor=west},
+					legend pos=north west,
+				}
+			]
+			\addplot+[error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(0,0.144412) +- (0.000000,0.004986)
+					(10,0.566471) +- (0.000000,0.012990)
+					(20,0.647353) +- (0.000000,0.010089)
+					(30,0.708971) +- (0.000000,0.008338)
+					(40,0.751912) +- (0.000000,0.007973)
+					(50,0.794118) +- (0.000000,0.004295)
+					(60,0.832206) +- (0.000000,0.006241)
+					(70,0.875294) +- (0.000000,0.004885)
+					(80,0.918088) +- (0.000000,0.002928)
+					(90,0.958382) +- (0.000000,0.003199)
+					(100,0.990000) +- (0.000000,0.000000)
+			};
+			\addlegendentry{SS\texttt{-}CLAMP}
+			\addplot+[mark=triangle*,error bars/.cd,y dir=both,y explicit]
+			coordinates {
+				(0,0.105882) +- (0.000000,0.000000)
+					(10,0.255882) +- (0.000000,0.011377)
+					(20,0.224559) +- (0.000000,0.010835)
+					(30,0.213824) +- (0.000000,0.015237)
+					(40,0.184559) +- (0.000000,0.041137)
+					(50,0.189412) +- (0.000000,0.020566)
+					(60,0.170147) +- (0.000000,0.016328)
+					(70,0.137941) +- (0.000000,0.023854)
+					(80,0.141471) +- (0.000000,0.030146)
+					(90,0.173382) +- (0.000000,0.062059)
+					(100,0.108088) +- (0.000000,0.002794)
+			};
+			\addlegendentry{SS\texttt{-}CARD}
+			\end{axis}
+		\end{tikzpicture}
+	\end{figure}
+\end{frame}
+
+%
+% So, we selected a few clusters with their prototypes for each algorithm,
+% we can notice that the restrictions helped to the formation of these
+% clusters for the ss-clamp, (without any information there were more empty
+% clusters).
+%
+
+\begin{frame}{Prototypes obtained}
+	\begin{figure}
+		\centering
+		\subfigure[Sunflower?]{\includegraphics[width=0.74\textwidth]{image/F1.jpg}}
+		\subfigure[Sunflower ]{\includegraphics[width=0.74\textwidth]{image/F2.jpg}}
+	\end{figure}
+\end{frame}
+
+%
+% It's worth to mention that even that all images in (d) seem to belong
+% to the same class, this is not true because the ninth and
+% tenth image are in fact both Dandelions, which is a flower
+% very similar to the Colts’Foot species.
+%
+\begin{frame}{Prototypes obtained}
+	\begin{figure}
+		\centering
+		\subfigure[Colts' Foot?]{\includegraphics[width=0.74\textwidth]{image/F3.jpg}}
+		\subfigure[Colts' Foot]{\includegraphics[width=0.74\textwidth]{image/F4.jpg}}
+	\end{figure}
 \end{frame}
 
 \begin{frame}{Prototypes obtained}
-\begin{figure}
-\centering
-\subfigure[Sunflower?]{\includegraphics[width=0.74\textwidth]{image/F1.jpg}}
-\subfigure[Sunflower ]{\includegraphics[width=0.74\textwidth]{image/F2.jpg}}
-\end{figure}
+	\begin{figure}
+		\centering
+		\subfigure[Windflower?]{\includegraphics[width=0.74\textwidth]{image/F5.jpg}}
+		\subfigure[Windflower ]{\includegraphics[width=0.74\textwidth]{image/F6.jpg}}
+	\end{figure}
 \end{frame}
 
-\begin{frame}{Prototypes obtained}
-\begin{figure}
-\centering
-\subfigure[Windflower?]{\includegraphics[width=0.74\textwidth]{image/F5.jpg}}
-\subfigure[Windflower ]{\includegraphics[width=0.74\textwidth]{image/F6.jpg}}
-\end{figure}
-\end{frame}
+%
+% So, reviewing this presentation...
+%
 
 \section*{Summary}
 
 \begin{frame}{Summary}
   \begin{itemize}
 		\item{Semi-supervised algorithm to give a fuzzy partition and a set of prototypes for each cluster}
-		\item{Intuitive approach to compute the $\alpha$}
-		\item{Precision in calculating the new membership degree}
+		% using binary search to find an approximate solution
+		\item{Intuitive and simple approach to calculate the $\alpha$}
+		% mathematical stability
+		\item{Precision in calculating the new membership degree using the Kuhn-Tucker's conditions}
   \end{itemize}
   \vskip0pt plus.5fill
   \begin{itemize}
   \item{Outlook}
     \begin{itemize}
+			% e.g. the number of prototypes is a parameter
 			\item{Extend this model to be simpler}
+			% using some preprocess, more efficient data structure (kd-tree)
 			\item{Investigate the possibility of improve the running time for compute the new prototypes}
     \end{itemize}
   \end{itemize}
@@ -842,14 +969,26 @@ good(\alpha)=
   \frametitle<presentation>{For Further Reading}
     
   \begin{thebibliography}{10}
-    
+ 
+ 	\tiny
+
   \beamertemplatebookbibitems
 	
 	\bibitem{chapele}
 	O.~Chapelle, B.~Sch{\"o}lkopf, and A.~Zien, editors.
 	\newblock {\em Semi-Supervised Learning}.
 	\newblock MIT Press, Cambridge, MA, 2006.
-    
+	
+	\bibitem{clrs}
+	T.~H. Cormen, C.~E. Leiserson, R.~L. Rivest, and C.~Stein.
+	\newblock {\em Introduction to Algorithms}.
+	\newblock The MIT Press, 3rd edition, 2009.
+	
+	\bibitem{finding-groups-in-data2005}
+	Leonard Kaufman and Peter~J. Rousseeuw.
+	\newblock {\em {Finding Groups in Data: An Introduction to Cluster Analysis (Wiley Series in Probability and Statistics)}}.
+	\newblock Wiley-Interscience, March 2005.
+
   \beamertemplatearticlebibitems
 	
 	\bibitem{Frigui2008}
@@ -857,7 +996,17 @@ good(\alpha)=
 	\newblock Fuzzy clustering and aggregation of relational data with instance-level constraints.
 	\newblock {\em Trans. Fuz Sys.}, 16(6):1565--1581, December 2008.
 
-  \end{thebibliography}
+	\bibitem{Nilsback06}
+	M-E. Nilsback and A.~Zisserman.
+	\newblock A visual vocabulary for flower classification.
+	\newblock In {\em Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition}, volume~2, pages 1447--1454, 2006.
+	
+	\bibitem{deCarvalho2012}
+	Francisco de~A.T.~de Carvalho, Yves Lechevallier, and Filipe~M. de~Melo.
+	\newblock Relational partitioning fuzzy clustering algorithms based on multiple dissimilarity matrices.
+	\newblock {\em Fuzzy Sets and Systems}, 215: 1--28, 2013.
+  
+	\end{thebibliography}
 \end{frame}
 
 % end
