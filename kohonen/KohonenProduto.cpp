@@ -14,6 +14,52 @@ namespace Util {
 	int cmp(double x, double y = 0, double eps = 1e-7) {
 		if(fabs(x-y) <= eps) return 0; else return x < y ? -1 : +1;
 	}
+	double f_rand(double f_min, double f_max) {
+		double f = double(rand()) / RAND_MAX;
+		return f_min + f * (f_max - f_min);
+	}
+	void bivariate_gaussian(double sigma_x, double sigma_y, double mean_x, double mean_y, double rho, double &x, double &y) {
+		double u, v, r2, scale;
+		do {
+			u = -1 + 2 * f_rand (0.0,1.0);
+			v = -1 + 2 * f_rand (0.0,1.0);
+			r2 = u * u + v * v;
+		} while (r2 > 1.0 || r2 == 0);
+		scale = sqrt (-2.0 * log (r2) / r2);
+		x = mean_x + sigma_x * u * scale;
+		y = mean_y + sigma_y * (rho * u + sqrt(1 - rho*rho) * v) * scale;
+	}
+};
+
+namespace MonteCarlo {
+  const int variable_number = 2;
+  int class_number;
+  vector<int> class_size;
+  vector< pair<double,double> > mean;
+  vector< pair<double,double> > deviation;
+  vector<double> rho;
+  void read(ifstream &in) {
+    in>>class_number;
+    class_size.resize(class_number);
+    mean.resize(class_number);
+    deviation.resize(class_number);
+    rho.resize(class_number);
+    rep(i,class_number) {
+      in>>class_size[i];
+      in>>mean[i].x>>mean[i].y;
+      in>>deviation[i].x>>deviation[i].y;
+      in>>rho[i];
+    }
+  }
+  vector< pair<double,double> > generate() {
+    int pattern_number = accumulate(class_size.begin(),class_size.end(),0), p=0;
+    vector< pair<double,double> > pattern(pattern_number);
+    rep(i,class_number) rep(j,class_size[i]) {
+      Util::bivariate_gaussian(deviation[i].x, deviation[i].y, mean[i].x, mean[i].y, rho[i], pattern[p].x, pattern[p].y);
+      p++;
+    }
+    assert(p == pattern_number);
+  }
 };
 
 namespace MinCostMaxFlow {
@@ -176,6 +222,15 @@ namespace Kohonen {
 		input = mapa["(Input_file)"];
 		output = mapa["(Output_file)"];
 	
+	  bool monte_carlo = (input==string("MONTECARLO"));
+	  
+	  if(monte_carlo) {
+      individual.clear();
+      
+      return;
+    }
+	  
+	  // read data from file
 		ifstream data(input.c_str());
 		string line;
 	
