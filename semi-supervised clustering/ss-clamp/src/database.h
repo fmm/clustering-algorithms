@@ -7,7 +7,7 @@
 struct Database {
 	sqlite3 *db;
 	Database() {
-	  db = NULL;
+		db = NULL;
 	}
 	Database(string database_name) {
 		ASSERT(
@@ -17,22 +17,22 @@ struct Database {
 	}
 	~Database() {
 		ASSERT(
-		    sqlite3_close(db) == SQLITE_OK,
-				"failed to close database"
+			sqlite3_close(db) == SQLITE_OK,
+			"failed to close database"
 		);
 	}
 	// the reference of the database is lost when you use the assignment operator
 	Database& operator=(Database rhs) {
-	  this->db = rhs.db, rhs.db = NULL;
-	  return *this;
+		this->db = rhs.db, rhs.db = NULL;
+		return *this;
 	}
 	vector< vector<string> > execute(string sql) {
 		ASSERT(db, "database is not opened");
 		vector< vector<string> > result;
 		sqlite3_stmt *statement;
 		ASSERT(
-				sqlite3_prepare_v2(db, sql.c_str(), -1, &statement, 0) == SQLITE_OK,
-				"failed to execute sql=\"" + sql + "\""
+			sqlite3_prepare_v2(db, sql.c_str(), -1, &statement, 0) == SQLITE_OK,
+			"failed to execute sql=\"" + sql + "\""
 		);
 		for(int columns = sqlite3_column_count(statement); sqlite3_step(statement) == SQLITE_ROW;) {
 			vector<string> values(columns, "?");

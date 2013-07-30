@@ -6,8 +6,8 @@
 #include "sha1.h"
 
 struct Parameter {
-  // database to store results
-  Database database;
+	// database to store results
+	Database database;
 	// hash string for all parameters
 	string sha1;
 	// seed used for the random generator
@@ -49,7 +49,7 @@ struct Parameter {
 	vector<Matrix> table;
 	// summary of all variables
 	map< string, vector<string> > summary;
-	
+
 	// class constructor
 	Parameter(string file_name) {
 		// load general variables
@@ -57,25 +57,25 @@ struct Parameter {
 		// calculate unique id
 		generate_id();
 	}
-	
+
 	void generate_id() {
 		sha1 = "";
 		for(map< string, vector<string> >::iterator iter = summary.begin(); iter != summary.end(); iter++){
-		  sha1 += iter->first;
-		  sha1 += accumulate(iter->second.begin(),iter->second.end(),string(":"));
+			sha1 += iter->first;
+			sha1 += accumulate(iter->second.begin(),iter->second.end(),string(":"));
 		}
 		sha1 = sha1::process(sha1);  
-  }
-	
+	}
+
 	void set_default_values() {
 		if(summary.count("[SEED]") == 0) {
-		  summary["[SEED]"].push_back(Util::cast<string>(time(NULL)));
+			summary["[SEED]"].push_back(Util::cast<string>(time(NULL)));
 		}
 		if(summary.count("[EPS_FOR_CRITERION]") == 0) {
-		  summary["[EPS_FOR_CRITERION]"].push_back(Util::cast<string>((double)(1e-12)));
+			summary["[EPS_FOR_CRITERION]"].push_back(Util::cast<string>((double)(1e-12)));
 		}
-  }
-	
+	}
+
 	void load(string file_name) {
 		ifstream in(file_name.c_str(), ios::in);
 		VALIDATE_FILE(in, file_name);
@@ -129,7 +129,7 @@ struct Parameter {
 				table.push_back(Matrix(N,Row(N,0.0)));
 				read_table(input[i], table.back());
 			} else if(Util::ends_with(input[i],".pwc")) {
-			  pwc_file = input[i];
+				pwc_file = input[i];
 				// set label and pairwise constraints
 				read_pairwise_constraints(input[i]);
 			} else ASSERT(false, "file not supported: " + input[i]);
@@ -138,40 +138,40 @@ struct Parameter {
 		T = table.size();
 	}
 
-  void read_individual_number(string file_name) {
-    ifstream in(file_name.c_str(), ios::in);
-    VALIDATE_FILE(in, file_name);
-    string line;
-    do VALIDATE_FILE(getline(in,line),file_name);
-    while(line.find("indiv_nb") == string::npos);
-    ASSERT(
-      sscanf(line.c_str()," indiv_nb = %d", &N) == 1,
-      "failed to read the number of individuals"
-    );
-    in.close();
+	void read_individual_number(string file_name) {
+		ifstream in(file_name.c_str(), ios::in);
+		VALIDATE_FILE(in, file_name);
+		string line;
+		do VALIDATE_FILE(getline(in,line),file_name);
+		while(line.find("indiv_nb") == string::npos);
+		ASSERT(
+			sscanf(line.c_str()," indiv_nb = %d", &N) == 1,
+			"failed to read the number of individuals"
+		);
+		in.close();
 	}
-	
-  void read_priori_cluster(string file_name) {
-    ifstream in(file_name.c_str(), ios::in);
-    VALIDATE_FILE(in, file_name);
-    string line;
-    do VALIDATE_FILE(getline(in,line),file_name);
-    while(line.find("RECTANGLE_MATRIX = (") == string::npos);
+
+	void read_priori_cluster(string file_name) {
+		ifstream in(file_name.c_str(), ios::in);
+		VALIDATE_FILE(in, file_name);
+		string line;
+		do VALIDATE_FILE(getline(in,line),file_name);
+		while(line.find("RECTANGLE_MATRIX = (") == string::npos);
 		priori_cluster.clear();
-    for(unsigned int i = 0; i < N; ++i) {
-      line.clear();
-      char c;
-      int ct = 0;
-      while(ct == 0) {
+		for(unsigned int i = 0; i < N; ++i) {
+			line.clear();
+			char c;
+			int ct = 0;
+			while(ct == 0) {
 				VALIDATE_FILE(in>>c, file_name);
-        if(c == '(') ct++;
-      }
-      while(ct != 0) {
-        VALIDATE_FILE(in>>c, file_name);
-        if(c == '(') ct++; else if(c == ')') ct--;
-        if(ct != 0) line.push_back(c);
-      }
-      line.push_back(',');
+				if(c == '(') ct++;
+			}
+			while(ct != 0) {
+				VALIDATE_FILE(in>>c, file_name);
+				if(c == '(') ct++; else if(c == ')') ct--;
+				if(ct != 0) line.push_back(c);
+			}
+			line.push_back(',');
 			vector<string> var;
 			string piece;
 			for(unsigned int j = 0; j < line.size(); ++j) if(line[j] != ' ') {
@@ -181,41 +181,41 @@ struct Parameter {
 				} else piece.push_back(line[j]);
 			}
 			unsigned int priori;
-		  ASSERT(
-		    sscanf(var[class_variable-1].c_str(),"%u",&priori) == 1,
-		    "failed to read the priori cluster"
-		  );
-	    while(priori > priori_cluster.size()) priori_cluster.push_back(Cluster());
-	    priori_cluster[priori - 1].insert(i);
-    }
+			ASSERT(
+				sscanf(var[class_variable-1].c_str(),"%u",&priori) == 1,
+				"failed to read the priori cluster"
+			);
+			while(priori > priori_cluster.size()) priori_cluster.push_back(Cluster());
+			priori_cluster[priori - 1].insert(i);
+		}
 		in.close();
-  }
-  
-  void read_table(string file_name, Matrix& M) {
-    ifstream in(file_name.c_str(), ios::in);
-    VALIDATE_FILE(in, file_name);
-    string line;
-    do VALIDATE_FILE(getline(in,line), file_name);
-    while(line.find("DIST_MATRIX= (") == string::npos);
-    for(unsigned int i = 0; i < N; ++i) {
-      line.clear();
-      char c;
-      for(c = '?';c != '('; VALIDATE_FILE(in>>c, file_name));
-      for(VALIDATE_FILE(in>>c, file_name);c != ')'; VALIDATE_FILE(in>>c, file_name)) line.push_back(c);
-      for(unsigned int j = 0; j < line.size(); ++j) {
-        if(line[j] == '(' || line[j] == ')' || line[j] == ',') {
-          line[j] = ' ';
-        }
-      }
-      stringstream s(line);
-      for(unsigned int j = 0; j <= i; ++j) {
-        double d;
-        VALIDATE_FILE(s>>d, file_name);
-        M[i][j] = M[j][i] = d;
-      }
-    }
-    in.close();
-  }
+	}
+
+	void read_table(string file_name, Matrix& M) {
+		ifstream in(file_name.c_str(), ios::in);
+		VALIDATE_FILE(in, file_name);
+		string line;
+		do VALIDATE_FILE(getline(in,line), file_name);
+		while(line.find("DIST_MATRIX= (") == string::npos);
+		for(unsigned int i = 0; i < N; ++i) {
+			line.clear();
+			char c;
+			for(c = '?';c != '('; VALIDATE_FILE(in>>c, file_name));
+			for(VALIDATE_FILE(in>>c, file_name);c != ')'; VALIDATE_FILE(in>>c, file_name)) line.push_back(c);
+			for(unsigned int j = 0; j < line.size(); ++j) {
+				if(line[j] == '(' || line[j] == ')' || line[j] == ',') {
+					line[j] = ' ';
+				}
+			}
+			stringstream s(line);
+			for(unsigned int j = 0; j <= i; ++j) {
+				double d;
+				VALIDATE_FILE(s>>d, file_name);
+				M[i][j] = M[j][i] = d;
+			}
+		}
+		in.close();
+	}
 
 	void read_pairwise_constraints(string file_name) {
 		ifstream in(file_name.c_str(), ios::in);
@@ -225,49 +225,49 @@ struct Parameter {
 		while(line.find("INFO = (") == string::npos);
 		// set percentage of labeled data
 		VALIDATE_FILE(getline(in,line), file_name);
-    ASSERT(
-      sscanf(line.c_str()," percentage = %" DOUBLE, &label) == 1,
-      "failed to read the percentage of labeled data"
-    );
-    unsigned int n_must_link, n_cannot_link;
+		ASSERT(
+			sscanf(line.c_str()," percentage = %" DOUBLE, &label) == 1,
+			"failed to read the percentage of labeled data"
+		);
+		unsigned int n_must_link, n_cannot_link;
 		VALIDATE_FILE(getline(in,line), file_name);
-    ASSERT(
-      sscanf(line.c_str()," must_link = %u", &n_must_link) == 1,
-      "failed to read the number of must-link pairs"
-    );
+		ASSERT(
+			sscanf(line.c_str()," must_link = %u", &n_must_link) == 1,
+			"failed to read the number of must-link pairs"
+		);
 		VALIDATE_FILE(getline(in,line), file_name);
-    ASSERT(
-      sscanf(line.c_str()," cannot_link = %u", &n_cannot_link) == 1,
-      "failed to read the number of cannot-link pairs"
-    );
-    // set must-link constraints
+		ASSERT(
+			sscanf(line.c_str()," cannot_link = %u", &n_cannot_link) == 1,
+			"failed to read the number of cannot-link pairs"
+		);
+		// set must-link constraints
 		do VALIDATE_FILE(getline(in,line), file_name);
 		while(line.find("MUST_LINK = (") == string::npos);
 		must_link.clear();
 		for(unsigned int i = 0; i < n_must_link; ++i) {
-      VALIDATE_FILE(getline(in,line), file_name);
-      unsigned int a, b;
-      ASSERT(
-        sscanf(line.c_str(), " (%u,%u)", &a,&b) == 2,
-        "failed to read the must-link constraint: " + line
-      );
-      must_link.insert(make_pair(a,b));
-      must_link.insert(make_pair(b,a));
-    }
-    // set cannot-link constraints
+			VALIDATE_FILE(getline(in,line), file_name);
+			unsigned int a, b;
+			ASSERT(
+				sscanf(line.c_str(), " (%u,%u)", &a,&b) == 2,
+				"failed to read the must-link constraint: " + line
+			);
+			must_link.insert(make_pair(a,b));
+			must_link.insert(make_pair(b,a));
+		}
+		// set cannot-link constraints
 		do VALIDATE_FILE(getline(in,line), file_name);
 		while(line.find("CANNOT_LINK = (") == string::npos);
 		cannot_link.clear();
 		for(unsigned int i = 0; i < n_cannot_link; ++i) {
-      VALIDATE_FILE(getline(in,line), file_name);
-      unsigned int a, b;
-      ASSERT(
-        sscanf(line.c_str(), " (%u,%u)", &a,&b) == 2,
-        "failed to read the cannot-link constraint: " + line
-      );
-      cannot_link.insert(make_pair(a,b));
-      cannot_link.insert(make_pair(b,a));
-    }
+			VALIDATE_FILE(getline(in,line), file_name);
+			unsigned int a, b;
+			ASSERT(
+				sscanf(line.c_str(), " (%u,%u)", &a,&b) == 2,
+				"failed to read the cannot-link constraint: " + line
+			);
+			cannot_link.insert(make_pair(a,b));
+			cannot_link.insert(make_pair(b,a));
+		}
 		in.close();
 	}
 

@@ -41,8 +41,7 @@ namespace sha1
 	namespace // local
 	{
 		// Rotate an integer value to left.
-		inline const unsigned int rol(const unsigned int value,
-				const unsigned int steps)
+		inline const unsigned int rol(const unsigned int value, const unsigned int steps)
 		{
 			return ((value << steps) | (value >> (32 - steps)));
 		}
@@ -66,8 +65,7 @@ namespace sha1
 			unsigned int e = result[4];
 
 			int round = 0;
-
-#define sha1macro(func,val) \
+			#define sha1macro(func,val) \
 			{ \
 				const unsigned int t = rol(a, 5) + (func) + e + val + w[round]; \
 				e = d; \
@@ -107,7 +105,7 @@ namespace sha1
 					++round;
 			}
 
-#undef sha1macro
+			#undef sha1macro
 
 			result[0] += a;
 			result[1] += b;

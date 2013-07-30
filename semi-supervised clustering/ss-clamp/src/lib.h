@@ -11,14 +11,14 @@ using namespace std;
 #define ASSERT(condition,message) __assert(condition, message, __FILE__, __LINE__)
 
 void __assert(bool _condition, string _message, const char* _file, int _line) {
-  if(!(_condition)) {
-    std::cerr << "ASSERTION FAILED!" << std::endl
-              << "File = " << _file << std::endl    
-              << "Line = " << _line << std::endl 
-              << "Message = " << _message << std::endl;
-    #ifndef NDEBUG
-      std::exit(EXIT_FAILURE);
-    #endif     
+	if(!(_condition)) {
+		std::cerr << "ASSERTION FAILED!" << std::endl
+			        << "File = " << _file << std::endl
+							<< "Line = " << _line << std::endl
+							<< "Message = " << _message << std::endl;
+		#ifndef NDEBUG
+			std::exit(EXIT_FAILURE);
+		#endif     
   }
 }
 

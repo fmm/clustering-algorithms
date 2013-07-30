@@ -4,10 +4,10 @@
 #include "lib.h"
 
 struct MinimumCostMaximumFlow {
-  vector<int> graph;
-  vector<int> from, to, weight, cap, prev;
-  void add(unsigned int u, unsigned int v, int w, int c, bool reverse = true) {
-    while(u >= graph.size()) graph.push_back(-1);
+	vector<int> graph;
+	vector<int> from, to, weight, cap, prev;
+	void add(unsigned int u, unsigned int v, int w, int c, bool reverse = true) {
+		while(u >= graph.size()) graph.push_back(-1);
 		from.push_back(u);
 		to.push_back(v);
 		weight.push_back(w);
@@ -15,7 +15,7 @@ struct MinimumCostMaximumFlow {
 		prev.push_back(graph[u]);
 		graph[u] = from.size() - 1;
 		if(reverse) add(v, u, -w, 0, false);
-  }
+	}
 	pair<int,int> process(unsigned int source, unsigned int sink) {
 		pair<int,int> p(0,0);
 		for(unsigned int n = graph.size();;) {

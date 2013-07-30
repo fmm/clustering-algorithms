@@ -4,7 +4,7 @@
 #include "ssclamp.h"
 
 struct SSClampProductGlobal : public SSClamp {
-	
+
 	SSClampProductGlobal(Parameter &params) : SSClamp(params) {
 	}
 

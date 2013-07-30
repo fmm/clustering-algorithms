@@ -22,31 +22,31 @@ struct Method {
 	} timer;
 
 	MersenneTwister random;
-	
+
 	struct Answer {
-	  // global
-	  unsigned int initialization;
-	  unsigned int iteration;
-	  double criterion;
-	  double restriction;
-	  vector<Cluster> cluster;
-	  Matrix U;
-	  Matrix Relevance;
-	  // auxiliar
-	  vector<Prototype> prototype;
-	  double beta;
+		// global
+		unsigned int initialization;
+		unsigned int iteration;
+		double criterion;
+		double restriction;
+		vector<Cluster> cluster;
+		Matrix U;
+		Matrix Relevance;
+		// auxiliar
+		vector<Prototype> prototype;
+		double beta;
 		double eps;
-	  // compare function
+		// compare function
 		bool operator<(const Answer& answer) const {
 			return Util::cmp(criterion, answer.criterion, eps) < 0;
 		}
 	};
-	
+
 	Method(Parameter &params) : params(params) {
-	  timer.start_timer();
-	  random = MersenneTwister(params.seed);
+		timer.start_timer();
+		random = MersenneTwister(params.seed);
 	}
-	
+
 	virtual void initialize(Answer &answer, unsigned int init, unsigned int iter) {
 		answer.initialization = init;
 		answer.iteration = iter;
@@ -57,7 +57,7 @@ struct Method {
 		answer.Relevance = Matrix(params.C,Row(params.T));
 		answer.eps = params.eps_for_criterion;
 	}
-	
+
 	virtual double compute_criterion(Answer &answer) = 0;
 
 	virtual void srand(Answer &answer) = 0;
@@ -69,9 +69,9 @@ struct Method {
 		double new_criterion = answer.criterion;
 		// TODO: change to throw exception		
 		ASSERT(
-			new_criterion <= old_criterion or log(fabs(new_criterion - old_criterion)) <= answer.eps,
-			"failed to minimize criterion"
-		);
+				new_criterion <= old_criterion or log(fabs(new_criterion - old_criterion)) <= answer.eps,
+				"failed to minimize criterion"
+				);
 		answer.criterion = new_criterion;
 		if(fabs(new_criterion - old_criterion) > answer.eps) {
 			// TODO: store results
@@ -80,7 +80,7 @@ struct Method {
 		// local optimum was reached
 		return false;
 	}
-	
+
 	const void update_clusters(Answer &answer) {
 		for(unsigned int k = 0; k < params.C; ++k) {
 			answer.cluster[k].clear();
@@ -88,12 +88,12 @@ struct Method {
 		for(unsigned int i = 0; i < params.N; ++i) {
 			vector< pair<double,int> > v(params.C);
 			for(unsigned int k = 0; k < params.C; ++k) {
-			  v[k] = make_pair(answer.U[i][k],k);
+				v[k] = make_pair(answer.U[i][k],k);
 			}
 			answer.cluster[max_element(v.begin(),v.end())->second].insert(i);
 		}
 	}
-			
+
 	const vector< vector<unsigned int> > compute_confusion_matrix(Answer &answer) {
 		unsigned int k = params.C;
 		unsigned int p = params.priori_cluster.size();
@@ -115,10 +115,10 @@ struct Method {
 		return table;
 	}
 
-  // TODO: considering that every values is already defined
+	// TODO: considering that every values is already defined
 	Answer process() {
 		Answer best;
-	  initialize(best,0,0);
+		initialize(best,0,0);
 		for(unsigned int init = 1; init <= params.initialization; ++init) {
 			if(timer.elapsed() > params.time_limit) {
 				WARNING("time limit was reached at initialization #" + Util::cast<string>(init));
@@ -131,7 +131,7 @@ struct Method {
 				if(optimize(now)) {
 					// TODO: print line
 				} else {
-				  break;
+					break;
 				}
 			}
 			// optimize the best result
@@ -140,7 +140,7 @@ struct Method {
 		// TODO: print result in a pdf file
 		return best;
 	}
-	
+
 };
 
 #endif
