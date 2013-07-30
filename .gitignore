@@ -18,6 +18,7 @@
 *.sds
 *.pdf
 *.txt
+tmp/
 input/
 output/
 workspace/
