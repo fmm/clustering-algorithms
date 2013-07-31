@@ -5,7 +5,7 @@ using namespace std;
 #include <bits/stdc++.h>
 
 // stringify
-#define str(x) #x
+#define STR(x) #x
 
 // assertive
 #define ASSERT(condition,message) __assert(condition, message, __FILE__, __LINE__)
@@ -25,10 +25,13 @@ void __assert(bool _condition, string _message, const char* _file, int _line) {
 // warning
 #define WARNING(message) std::cerr << "WARNING: " << message << std::endl
 
+// alert
+#define ALERT(message) std::cerr << "[" << message << "]" << std::endl
+
 // for debug
 #ifndef NDEBUG
 	#define _ << ", " <<
-	#define dbg(x) std::cerr << str(x) << " = " << x << std::endl
+	#define dbg(x) std::cerr << STR(x) << " = " << x << std::endl
 	#define pv(x,y) \
 		do { \
 			for(typeof(y) __xy = (x); __xy != (y); __xy++) { \
