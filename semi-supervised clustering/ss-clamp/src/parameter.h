@@ -35,6 +35,8 @@ struct Parameter {
   unsigned long long time_limit;
   // eps for objective function
   double eps_for_criterion;
+  // relevance factor
+  double relevance_v;
   // percentage of labeled data
   double label;
   // self training constasts
@@ -75,6 +77,7 @@ struct Parameter {
       "individuals,"
       "prototypes,"
       "eps,"
+      "relevance_v,"
       "iterations,"
       "self_training_in,"
       "self_training_out)"
@@ -91,6 +94,7 @@ struct Parameter {
       Util::cast<string>(N) + "," +
       Util::cast<string>(P) + "," +
       Util::cast<string>(eps_for_criterion) + "," +
+      Util::cast<string>(relevance_v) + "," +
       Util::cast<string>(maximum_iteration) + "," +
       Util::cast<string>(self_training_in) + "," +
       Util::cast<string>(self_training_out) +
@@ -121,6 +125,9 @@ struct Parameter {
     }
     if(summary.count("[EPS_FOR_CRITERION]") == 0) {
       summary["[EPS_FOR_CRITERION]"].push_back(Util::cast<string>((double)(1e-12)));
+    }
+    if(summary.count("[RELEVANCE_V]") == 0) {
+      summary["[RELEVANCE_V]"].push_back(Util::cast<string>((double)(1.0)));
     }
     if(summary.count("[SELF_TRAINING_IN]") == 0) {
       summary["[SELF_TRAINING_IN]"].push_back(Util::cast<string>((double)(1.0)));
@@ -171,6 +178,8 @@ struct Parameter {
     time_limit = 60000000ULL * Util::cast<double>(summary["[TIME_LIMIT]"][0]);
     // set eps for criterion
     eps_for_criterion = Util::cast<double>(summary["[EPS_FOR_CRITERION]"][0]);
+    // set relevance factor
+    relevance_v = Util::cast<double>(summary["[RELEVANCE_V]"][0]);
     // set input files
     input = summary["[INPUT]"];
     N = 0;

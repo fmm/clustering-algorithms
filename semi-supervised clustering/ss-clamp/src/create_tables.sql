@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS algorithm (
     individuals INTEGER,
     prototypes INTEGER,
     eps REAL,
+    relevance_v REAL,
     iterations INTEGER,
     self_training_in REAL,
     self_training_out REAL,
@@ -22,7 +23,7 @@ CREATE TABLE IF NOT EXISTS algorithm (
     used_alpha REAL,
     best_initialization INTEGER,
     PRIMARY KEY(sha1)
-  );
+    );
 
 CREATE TABLE IF NOT EXISTS input (
     algorithm_id TEXT,

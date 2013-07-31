@@ -1,5 +1,5 @@
-#ifndef SS_CLAMP_PROD_GLOBAL_H_
-#define SS_CLAMP_PROD_GLOBAL_H_
+#ifndef SS_CLAMP_PRODUCT_GLOBAL_H_
+#define SS_CLAMP_PRODUCT_GLOBAL_H_
 
 #include "ssclamp.h"
 

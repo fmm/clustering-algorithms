@@ -1,5 +1,5 @@
-#ifndef SS_CLAMP_PROD_LOCAL_H_
-#define SS_CLAMP_PROD_LOCAL_H_
+#ifndef SS_CLAMP_PRODUCT_LOCAL_H_
+#define SS_CLAMP_PRODUCT_LOCAL_H_
 
 #include "ssclamp.h"
 
