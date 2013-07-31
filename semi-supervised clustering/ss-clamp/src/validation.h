@@ -1,6 +1,7 @@
 #ifndef VALIDATION_H_
 #define VALIDATION_H_
 
+#include "lib.h"
 #include "minimumcostmaximumflow.h"
 
 namespace Validation {
@@ -74,10 +75,37 @@ namespace Validation {
 		return F / tab[N][M];
 	}
 	
-	// FIXME ASAP
-	// TODO: need to be implemented!
-	double qr() {
-	  return 0.0;
+	Matrix psi(Matrix U) {
+	  unsigned int N = U.size(), C = U[0].size();
+	  Matrix R(N,Row(N,0.0));
+	  for(unsigned int j = 0; j < N; ++j) {
+	    for(unsigned int k = 0; k < N; ++k) {
+	      for(unsigned int i = 0; i < C; ++i) {
+	        R[j][k] += U[j][i] * U[k][i];
+	      }
+	    }
+	  }
+	  return R;
+	}
+
+	double qr(Matrix U1, Matrix U2) {
+	  U1 = psi(U1);
+	  U2 = psi(U2);
+	  unsigned int N = U1.size();
+	  double N_SS = 0, N_SD = 0, N_DS = 0, N_DD = 0;
+	  for(unsigned int j = 0; j < N; ++j) {
+	    for(unsigned int k = 0; k < N; ++k) {
+        N_SS += U1[j][k]*U2[j][k];
+        N_SD += U1[j][k]*(1-U2[j][k]);
+        N_DS += (1-U1[j][k])*U2[j][k];
+        N_DD += (1-U1[j][k])*(1-U2[j][k]);
+	    }
+	  }
+	  if(N_SS + N_SD + N_DS + N_DD) {
+  	  return (N_SS + N_DD) / (N_SS + N_SD + N_DS + N_DD);
+  	} else {
+  	  return 0.0;
+  	}
 	}
 	
 };
