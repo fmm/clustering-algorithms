@@ -10,6 +10,8 @@ struct Parameter {
 	Database database;
 	// hash string for all parameters
 	string sha1;
+	// summarized info about the execution
+	string info;
 	// seed used for the random generator
 	time_t seed;
 	// index of the position of the priori cluster on "RECTANGLE_MATRIX" (0-based)
@@ -57,6 +59,52 @@ struct Parameter {
 		// calculate unique id
 		generate_id();
 	}
+	
+	void save() {
+	  // save algorithm execution
+	  string sql = "INSERT INTO algorithm("
+	               "sha1,"
+	               "info,"
+	               "seed,"
+	               "time_limit,"
+	               "class_variable,"
+	               "alpha,"
+	               "label_percentage,"
+	               "initializations,"
+	               "clusters,"
+	               "individuals,"
+	               "prototypes,"
+	               "eps,"
+	               "iterations,"
+	               "self_training_in,"
+	               "self_training_out)"
+	               "VALUES(" +
+	               string("\"" + sha1 + "\"") + "," +
+	               string("\"" + info + "\"") + "," +
+	               Util::cast<string>(seed) + "," +
+	               Util::cast<string>(time_limit) + "," +
+	               Util::cast<string>(class_variable) + "," +
+	               Util::cast<string>(alpha) + "," +
+	               Util::cast<string>(label) + "," +
+	               Util::cast<string>(initialization) + "," +
+	               Util::cast<string>(C) + "," +
+	               Util::cast<string>(N) + "," +
+	               Util::cast<string>(P) + "," +
+	               Util::cast<string>(eps_for_criterion) + "," +
+	               Util::cast<string>(maximum_iteration) + "," +
+	               Util::cast<string>(self_training_in) + "," +
+	               Util::cast<string>(self_training_out) +
+	               ");";
+	  database.execute(sql);
+	  // save input files
+	  for(unsigned int i = 0; i < input.size(); ++i) {
+	    sql = "INSERT INTO input(algorithm_id,file)VALUES(" +
+	          string("\"" + sha1 + "\"") + "," +
+	          string("\"" + input[i] + "\"") +
+	          ");";
+	    database.execute(sql);
+	  }
+	}
 
 	void generate_id() {
 		sha1 = "";
@@ -73,6 +121,12 @@ struct Parameter {
 		}
 		if(summary.count("[EPS_FOR_CRITERION]") == 0) {
 			summary["[EPS_FOR_CRITERION]"].push_back(Util::cast<string>((double)(1e-12)));
+		}
+		if(summary.count("[SELF_TRAINING_IN]") == 0) {
+		  summary["[SELF_TRAINING_IN]"].push_back(Util::cast<string>((double)(1.0)));
+		}
+		if(summary.count("[SELF_TRAINING_OUT]") == 0) {
+		  summary["[SELF_TRAINING_OUT]"].push_back(Util::cast<string>((double)(0.0)));
 		}
 	}
 
@@ -93,6 +147,8 @@ struct Parameter {
 		set_default_values();
 		// set dabasase
 		database = Database(summary["[DATABASE]"][0]);
+		// set info
+		info = accumulate(summary["[INFO]"].begin(),summary["[INFO]"].end(),string(""));
 		// set seed
 		seed = Util::cast<time_t>(summary["[SEED]"][0]);
 		// set class variable
@@ -107,6 +163,9 @@ struct Parameter {
 		P = Util::cast<unsigned int>(summary["[PROTOTYPES]"][0]);
 		// set alpha
 		alpha = Util::cast<double>(summary["[ALPHA]"][0]);
+		// set self training constants
+		self_training_in = Util::cast<double>(summary["[SELF_TRAINING_IN]"][0]);
+		self_training_out = Util::cast<double>(summary["[SELF_TRAINING_OUT]"][0]);
 		// set time limit
 		// converted to seconds
 		time_limit = 60000000ULL * Util::cast<double>(summary["[TIME_LIMIT]"][0]);

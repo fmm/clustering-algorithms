@@ -5,6 +5,7 @@
 #include "database.h"
 #include "mersennetwister.h"
 #include "parameter.h"
+#include "validation.h"
 
 struct Method {
 
@@ -46,6 +47,80 @@ struct Method {
 		timer.start_timer();
 		random = MersenneTwister(params.seed);
 	}
+	
+	void save_iteration(Answer &answer, string key) {
+	  vector< vector<unsigned int> > tab = compute_confusion_matrix(answer);
+	  string sql = "INSERT INTO answer("
+	               "algorithm_id,"
+	               "initialization,"
+	               "iteration,"
+	               "criterion,"
+	               "restriction,"
+	               "accuracy,"
+	               "adjusted_rand_index,"
+	               "f_measure,"
+	               "qr)"
+	               "VALUES(" +
+	               string("\"" + key + "\"") + "," +
+	               Util::cast<string>(answer.initialization) + "," +
+	               Util::cast<string>(answer.iteration) + "," +
+	               Util::cast<string>(answer.criterion) + "," +
+	               Util::cast<string>(answer.restriction) + "," +
+	               Util::cast<string>(Validation::accuracy(tab).first) + "," +
+	               Util::cast<string>(Validation::adjusted_rand_index(tab)) + "," +
+	               Util::cast<string>(Validation::f_measure(tab)) + "," +
+	               // FIXME ASAP
+	               Util::cast<string>(Validation::qr()) + 
+	               ");";
+    params.database.execute(sql);              
+	}
+	
+	void save_best(Answer &answer, string key) {
+	  string sql = "";
+	  // save partition
+	  for(unsigned int i = 0; i < params.N; ++i) {
+	    for(unsigned int k = 0; k < params.C; ++k) {
+	      sql = "INSERT INTO partition("
+	            "algorithm_id,"
+	            "individual,"
+	            "cluster,"
+	            "value)"
+	            "VALUES(" +
+	            string("\"" + key + "\"") + "," +
+	            Util::cast<string>(i) + "," +
+	            Util::cast<string>(k) + "," +
+	            Util::cast<string>(answer.U[i][k]) +
+	            ");";
+	      params.database.execute(sql);
+	    }
+	  }
+	  // save relevance vector
+	  for(unsigned int k = 0; k < params.C; ++k) {
+	    for(unsigned int t = 0; t < params.T; ++t) {
+	      sql = "INSERT INTO relevance("
+	            "algorithm_id,"
+	            "cluster,"
+	            "matrix,"
+	            "value)"
+	            "VALUES(" +
+	            string("\"" + key + "\"") + "," +
+	            Util::cast<string>(k) + "," +
+	            Util::cast<string>(t) + "," +
+	            Util::cast<string>(answer.Relevance[k][t]) +
+	            ");";
+	      params.database.execute(sql);
+	    }
+	  }
+		// update parameters used during the algorithm
+	  sql = "UPDATE algorithm SET "
+		      "used_pwc_file=\"" + params.pwc_file + "\"," +
+		      "used_clusters=" + Util::cast<string>(params.C) + "," +
+		      "used_prototypes=" + Util::cast<string>(params.P) + "," + 
+		      "used_alpha=" + Util::cast<string>(params.alpha) + "," +
+		      "best_initialization=" + Util::cast<string>(answer.initialization) + " " +
+		      "WHERE sha1=\"" + key + "\";";
+		params.database.execute(sql);
+	}
 
 	virtual void initialize(Answer &answer, unsigned int init, unsigned int iter) {
 		answer.initialization = init;
@@ -61,20 +136,19 @@ struct Method {
 	virtual double compute_criterion(Answer &answer) = 0;
 
 	virtual void srand(Answer &answer) = 0;
-
+	
 	virtual bool optimize(Answer &answer) {
 		update_clusters(answer);
 		double old_criterion = answer.criterion;
 		answer.criterion = compute_criterion(answer);
-		double new_criterion = answer.criterion;
-		// TODO: change to throw exception		
+		double new_criterion = answer.criterion;	
 		ASSERT(
-				new_criterion <= old_criterion or log(fabs(new_criterion - old_criterion)) <= answer.eps,
-				"failed to minimize criterion"
-				);
+			new_criterion <= old_criterion or log(fabs(new_criterion - old_criterion)) <= answer.eps,
+			"failed to minimize criterion"
+		);
 		answer.criterion = new_criterion;
 		if(fabs(new_criterion - old_criterion) > answer.eps) {
-			// TODO: store results
+		  ++answer.iteration;
 			return true;
 		}
 		// local optimum was reached
@@ -117,6 +191,10 @@ struct Method {
 
 	// TODO: considering that every values is already defined
 	Answer process() {
+	  const string key = params.sha1;
+	  // begin transaction
+	  params.database.open_transaction();
+	  params.save();
 		Answer best;
 		initialize(best,0,0);
 		for(unsigned int init = 1; init <= params.initialization; ++init) {
@@ -127,17 +205,21 @@ struct Method {
 			Answer now;
 			initialize(now, init, 0);
 			srand(now);
+			save_iteration(now,key);
 			for(unsigned int iter = 1; iter <= params.maximum_iteration; ++iter) {
 				if(optimize(now)) {
-					// TODO: print line
+				  save_iteration(now,key);
 				} else {
-					break;
+				  break;
 				}
 			}
 			// optimize the best result
 			best = min(best, now);
 		}
-		// TODO: print result in a pdf file
+		save_best(best, key);
+		// end transaction
+		params.database.close_transaction();
+		// TODO: print result in a tex/pdf file
 		return best;
 	}
 

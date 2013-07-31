@@ -73,6 +73,13 @@ namespace Validation {
 		}
 		return F / tab[N][M];
 	}
+	
+	// FIXME ASAP
+	// TODO: need to be implemented!
+	double qr() {
+	  return 0.0;
+	}
+	
 };
 
 #endif
