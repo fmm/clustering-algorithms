@@ -69,8 +69,7 @@ struct Method {
 	               Util::cast<string>(Validation::accuracy(tab).first) + "," +
 	               Util::cast<string>(Validation::adjusted_rand_index(tab)) + "," +
 	               Util::cast<string>(Validation::f_measure(tab)) + "," +
-	               // FIXME ASAP
-	               Util::cast<string>(Validation::qr()) + 
+	               Util::cast<string>(Validation::qr(answer.U,compute_priori_matrix())) + 
 	               ");";
     params.database.execute(sql);              
 	}
@@ -188,10 +187,55 @@ struct Method {
 		table[k][p] = params.N;
 		return table;
 	}
+	
+	const Matrix compute_priori_matrix() {
+	  Matrix Priori(params.N,Row(params.C,0));
+	  for(unsigned int i = 0; i < params.N; ++i) {
+	    for(unsigned int k = 0; k < params.C; ++k) {
+	      Priori[i][k] = params.priori_cluster.size() > k and params.priori_cluster[k].count(i);
+	    }
+	  }
+	  return Priori;
+	}
+	
+	string status(double percentage) {
+	  stringstream message;	  
+	  time_t ending = timer.elapsed() * (1 / percentage - 1);
+	  message << std::setw(2) << std::setfill('0')
+	          << Util::cast<int>(percentage*100) << "%, time left = ";
+	  // days
+	  if(unsigned long long d = ending / (1000000ULL * 60 * 60 * 24)) {
+      message << d << "d:";
+      ending %= (1000000ULL * 60 * 60 * 24);
+	  }
+	  // hours
+	  unsigned long long h = ending / (1000000ULL * 60 * 60);
+	  message << std::setw(2) << std::setfill('0')
+	          << h << "hs:";
+	  ending %= (1000000ULL * 60 * 60);
+	  // minutes
+	  unsigned long long m = ending / (1000000ULL * 60);
+	  message << std::setw(2) << std::setfill('0')
+	          << m << "min:";
+	  ending %= (1000000ULL * 60);
+	  // seconds
+	  unsigned long long s = ending / (1000000ULL);
+	  message << std::setw(2) << std::setfill('0')
+	          << s << "s:";
+	  ending %= (1000000ULL);
+	  // miliseconds
+	  message << std::setw(6) << std::setfill('0') << ending;
+	  return message.str();
+	}
 
 	// TODO: considering that every values is already defined
 	Answer process() {
+	  // hash of the execution
 	  const string key = params.sha1;
+	  // control the number of status prints
+		unsigned long long mask = 1;
+		while(mask<= params.initialization) mask<<=1;
+		mask=(mask>>4)-1;
 	  // begin transaction
 	  params.database.open_transaction();
 	  params.save();
@@ -215,6 +259,9 @@ struct Method {
 			}
 			// optimize the best result
 			best = min(best, now);
+		  if(init == 1 or init == params.initialization or !(init&mask)) {
+		    ALERT(status((double)(init)/params.initialization));
+		  }
 		}
 		save_best(best, key);
 		// end transaction
