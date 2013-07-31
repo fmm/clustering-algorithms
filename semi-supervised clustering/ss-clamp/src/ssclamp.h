@@ -219,17 +219,17 @@ struct SSClamp : public Method {
         while(true) {
           bool updated = false;
           double gamma = ({
-              double num = 0, den = 0;
-              for(unsigned int k = 0; k < params.C; ++k) {
+            double num = 0, den = 0;
+            for(unsigned int k = 0; k < params.C; ++k) {
               if(V[k]) {
-              VALIDATE_DENOMINATOR(a[k]);
-              num += (b[k] / a[k]);
-              den += (1.0 / a[k]);
+                VALIDATE_DENOMINATOR(a[k]);
+                num += (b[k] / a[k]);
+                den += (1.0 / a[k]);
               }
-              }
-              VALIDATE_DENOMINATOR(den);
-              (1.0 + num) / den;
-              });
+            }
+            VALIDATE_DENOMINATOR(den);
+            (1.0 + num) / den;
+          });
           for(unsigned int k = 0; k < params.C; ++k) {
             if(V[k]) {
               VALIDATE_DENOMINATOR(a[k]);
