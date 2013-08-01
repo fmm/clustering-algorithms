@@ -215,7 +215,7 @@ struct SSClamp : public Method {
       }
       if(V.size()) {
         // maximize membership for a[k]=0 in order to do this gamma must be
-        // the minimum b[k] for 
+        // the minimum b[k] for all k with a[k]=0 
         double gamma = INF;
         for(unsigned int k = 0; k < V.size(); ++k) {
           gamma = min(gamma, b[V[k]]);
