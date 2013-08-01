@@ -286,6 +286,10 @@ struct SSClamp : public Method {
       }
       // just to have a better precision
       if(true) {
+        // check
+        double sum = accumulate(answer.U[i].begin(),answer.U[i].end(),(double)(0.0));
+        ASSERT(log(fabs(sum-1.0)) <= answer.eps, "membership values were invalid");
+        // extra-normalize
         for(unsigned int k = 0; k < params.C; ++k) {
           if(Util::cmp(answer.U[i][k],0.0) <= 0) {
             answer.U[i][k] = 0.0;
@@ -293,8 +297,6 @@ struct SSClamp : public Method {
             answer.U[i][k] = 1.0;
           }
         }
-        double sum = accumulate(answer.U[i].begin(),answer.U[i].end(),(double)(0.0));
-        ASSERT(log(fabs(sum-1.0)) <= answer.eps, "membership values were invalid");
       }
     }
   }
