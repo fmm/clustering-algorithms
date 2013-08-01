@@ -54,6 +54,14 @@ struct SSClamp : public Method {
     Method::initialize(answer, init, iter);
     answer.prototype = vector<Prototype>(params.C);
   }
+  
+  virtual void set_default_relevance(Answer &answer) {
+    for(unsigned int k = 0; k < params.C; ++k) {
+      for(unsigned int t = 0; t < params.T; ++t) {
+        answer.Relevance[k][t] = 1.0;
+      }
+    }
+  }
 
   virtual void srand(Answer &answer) {
     ASSERT(
@@ -77,11 +85,7 @@ struct SSClamp : public Method {
       }
     }
     // initial relevance weight
-    for(unsigned int k = 0; k < params.C; ++k) {
-      for(unsigned int t = 0; t < params.T; ++t) {
-        answer.Relevance[k][t] = 1.0;
-      }
-    }
+    set_default_relevance(answer);
     // initial fuzzy partition
     for(unsigned int i = 0; i < params.N; ++i) {
       vector<double> dist(params.C,0.0);
@@ -149,73 +153,106 @@ struct SSClamp : public Method {
     }
   }
 
-  virtual void update_relevance(Answer &answer) {
-    // relevance doesn't change yet
-  }
+  virtual void update_relevance(Answer &answer) = 0;
 
   void update_membership(Answer& answer) {
     for(unsigned int i = 0; i < params.N; ++i) {
       vector<double> a(params.C,0), b(params.C,0);
-      vector<int> V;
+      // compute a[]
       for(unsigned int k = 0; k < params.C; ++k) {
         for(unsigned int t = 0; t < params.T; ++t) {
           for(unsigned int p = 0; p < params.P; ++p) {
             a[k] += dissimilarity(answer, i, answer.prototype[k][p], k, t);
           }
         }
+      }
+      // compute b[]
+      for(unsigned int m = 0; m < params.N; ++m) {
+        // must link
+        if(params.must_link.count(Pair(i,m))) {
+          for(unsigned int r = 0; r < params.C; ++r) {
+            for(unsigned int s = 0; s < params.C; ++s) {
+              if(r != s) {
+                b[r] += answer.U[m][s];
+              }
+            }
+          }
+        }
+        // cannot link
+        if(params.cannot_link.count(Pair(i,m))) {
+          for(unsigned int r = 0; r < params.C; ++r) {
+            b[r] += answer.U[m][r];
+          }
+        }
+      }
+      for(unsigned int l = 0; l < params.N; ++l) {
+        // must link
+        if(params.must_link.count(Pair(l,i))) {
+          for(unsigned int r = 0; r < params.C; ++r) {
+            for(unsigned int s = 0; s < params.C; ++s) {
+              if(r != s) {
+                b[s] += answer.U[l][r];
+              }
+            }
+          }
+        }
+        // cannot link
+        if(params.cannot_link.count(Pair(l,i))) {
+          for(unsigned int s = 0; s < params.C; ++s) {
+            b[s] += answer.U[l][s];
+          }
+        }
+      }    
+      for(unsigned int k = 0; k < params.C; ++k) {
+        a[k] *= 2;
+        b[k] *= params.alpha;
+      }
+      vector<unsigned int> V;
+      for(unsigned int k = 0; k < params.C; ++k) {
         if(Util::cmp(a[k]) <= 0) {
           V.push_back(k);
         }
       }
       if(V.size()) {
-        for(unsigned int k = 0; k < params.C; ++k) {
-          answer.U[i][k] = 0;
-        }
+        // maximize membership for a[k]=0 in order to do this gamma must be
+        // the minimum b[k] for 
+        double gamma = INF;
         for(unsigned int k = 0; k < V.size(); ++k) {
-          answer.U[i][V[k]] = 1.0 / V.size();
+          gamma = min(gamma, b[V[k]]);
+        }
+        double membership = 1.0;
+        for(unsigned int k = 0; k < params.C; ++k) {
+          if(Util::cmp(a[k]) > 0) {
+            if(Util::cmp(gamma,b[k]) >= 0) {
+              answer.U[i][k] = (gamma - b[k]) / a[k];
+            } else {
+              answer.U[i][k] = 0.0;
+            }
+            membership -= answer.U[i][k];
+          }
+        }
+        if(Util::cmp(membership) >= 0) {
+          // the sum should be equal to `membership'
+          // here this value is being equally distributed
+          for(unsigned int k = 0; k < V.size(); ++k) {
+            answer.U[i][V[k]] = membership / V.size();
+          }
+          V.clear();
+        } else {
+          // the b[k] greater equal than gamma should have membership
+          // value equal to zero according to the Kuhn-Tucker conditions
+          V = vector<unsigned int>(params.C,true);
+          for(unsigned int k = 0; k < params.C; ++k) {
+            if(Util::cmp(b[k],gamma) >= 0) {
+              answer.U[i][k] = 0.0;
+              V[k] = false;
+            }
+          }
         }
       } else {
-        for(unsigned int m = 0; m < params.N; ++m) {
-          // must link
-          if(params.must_link.count(Pair(i,m))) {
-            for(unsigned int r = 0; r < params.C; ++r) {
-              for(unsigned int s = 0; s < params.C; ++s) {
-                if(r != s) {
-                  b[r] += answer.U[m][s];
-                }
-              }
-            }
-          }
-          // cannot link
-          if(params.cannot_link.count(Pair(i,m))) {
-            for(unsigned int r = 0; r < params.C; ++r) {
-              b[r] += answer.U[m][r];
-            }
-          }
-        }
-        for(unsigned int l = 0; l < params.N; ++l) {
-          // must link
-          if(params.must_link.count(Pair(l,i))) {
-            for(unsigned int r = 0; r < params.C; ++r) {
-              for(unsigned int s = 0; s < params.C; ++s) {
-                if(r != s) {
-                  b[s] += answer.U[l][r];
-                }
-              }
-            }
-          }
-          // cannot link
-          if(params.cannot_link.count(Pair(l,i))) {
-            for(unsigned int s = 0; s < params.C; ++s) {
-              b[s] += answer.U[l][s];
-            }
-          }
-        }    
-        for(unsigned int k = 0; k < params.C; ++k) {
-          a[k] *= 2;
-          b[k] *= params.alpha;
-        }
-        V = vector<int>(params.C,1);
+        V = vector<unsigned int>(params.C,true);
+      }
+      if(V.size()) {
         while(true) {
           bool updated = false;
           double gamma = ({
