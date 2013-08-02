@@ -14,6 +14,7 @@
 # Other uninteresting files
 *~
 *.db
+*-journal
 *.out
 *.sds
 *.pdf
