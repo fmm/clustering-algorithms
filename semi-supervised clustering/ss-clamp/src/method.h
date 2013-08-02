@@ -144,6 +144,8 @@ struct Method {
     ASSERT(
         new_criterion <= old_criterion or log(fabs(new_criterion - old_criterion)) <= answer.eps,
         "failed to minimize criterion"
+        "(old=" + Util::cast<string>(old_criterion) + 
+        ",new=" + Util::cast<string>(new_criterion) + ")"
         );
     answer.criterion = new_criterion;
     if(fabs(new_criterion - old_criterion) > answer.eps) {
