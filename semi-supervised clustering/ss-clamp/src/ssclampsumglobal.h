@@ -35,7 +35,7 @@ struct SSClampSumGlobal : public SSClamp {
     for(unsigned int k = 0; k < params.C; ++k) {
       for(unsigned int t = 0; t < params.T; ++t) {
         answer.Relevance[k][t] = 0.0;
-        for(unsigned int h = 1; h < params.T; ++h) {
+        for(unsigned int h = 0; h < params.T; ++h) {
           answer.Relevance[k][t] += pow(dist[t] / dist[h], 1.0 / (params.relevance_v - 1));
         }
         VALIDATE_DENOMINATOR(answer.Relevance[k][t]);
