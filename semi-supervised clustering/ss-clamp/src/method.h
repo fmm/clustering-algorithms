@@ -1,7 +1,6 @@
 #ifndef METHOD_H_
 #define METHOD_H_
 
-#include <sys/time.h>
 #include "database.h"
 #include "mersennetwister.h"
 #include "parameter.h"
@@ -49,7 +48,8 @@ struct Method {
   }
 
   void save_iteration(Answer &answer, string key) {
-    vector< vector<unsigned int> > tab = compute_confusion_matrix(answer);
+    vector< vector<unsigned int> > confusing_matrix = compute_confusion_matrix(answer);
+    Matrix priori_matrix = compute_priori_matrix();
     string sql = "INSERT INTO answer("
       "algorithm_id,"
       "initialization,"
@@ -59,17 +59,19 @@ struct Method {
       "accuracy,"
       "adjusted_rand_index,"
       "f_measure,"
-      "qr)"
+      "fuzzy_rand_index_campello,"
+      "fuzzy_rand_index_hullermeier)"
       "VALUES(" +
       string("\"" + key + "\"") + "," +
       Util::cast<string>(answer.initialization) + "," +
       Util::cast<string>(answer.iteration) + "," +
       Util::cast<string>(answer.criterion) + "," +
       Util::cast<string>(answer.restriction) + "," +
-      Util::cast<string>(Validation::accuracy(tab).first) + "," +
-      Util::cast<string>(Validation::adjusted_rand_index(tab)) + "," +
-      Util::cast<string>(Validation::f_measure(tab)) + "," +
-      Util::cast<string>(Validation::qr(answer.U,compute_priori_matrix())) + 
+      Util::cast<string>(Validation::accuracy(confusing_matrix).first) + "," +
+      Util::cast<string>(Validation::adjusted_rand_index(confusing_matrix)) + "," +
+      Util::cast<string>(Validation::f_measure(confusing_matrix)) + "," +
+      Util::cast<string>(Validation::fuzzy_rand_index_campello(answer.U,priori_matrix)) + "," +
+      Util::cast<string>(Validation::fuzzy_rand_index_hullermeier(answer.U,priori_matrix)) + 
       ");";
     params.database.execute(sql);              
   }

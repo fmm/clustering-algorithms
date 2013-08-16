@@ -2,7 +2,6 @@
 #define DATABASE_H_
 
 #include "lib.h"
-#include <sqlite3.h>
 
 struct Database {
   sqlite3 *db;

@@ -3,6 +3,8 @@
 using namespace std;
 
 #include <bits/stdc++.h>
+#include <sqlite3.h>
+#include <sys/time.h>
 
 // stringify
 #define STR(x) #x

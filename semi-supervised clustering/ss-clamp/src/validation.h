@@ -3,6 +3,7 @@
 
 #include "lib.h"
 #include "minimumcostmaximumflow.h"
+#include "normalizedmetrics.h"
 
 namespace Validation {
   pair< double, vector<int> > accuracy(vector< vector<unsigned int> >& tab) {
@@ -88,7 +89,7 @@ namespace Validation {
     return R;
   }
 
-  double qr(Matrix U1, Matrix U2) {
+  double fuzzy_rand_index_campello(Matrix U1, Matrix U2) {
     U1 = psi(U1);
     U2 = psi(U2);
     unsigned int N = U1.size();
@@ -106,6 +107,18 @@ namespace Validation {
     } else {
       return 0.0;
     }
+  }
+
+  double fuzzy_rand_index_hullermeier(Matrix U1, Matrix U2, const Metrics::NormalizedMetrics& E = Metrics::L1) {
+    unsigned int N = U1.size();
+    double FRHR = 0;
+    for(unsigned int i = 0; i < N; i++) {
+      for(unsigned int j = i + 1; j < N; j++) {      
+        FRHR += fabs(E(U1[i],U1[j]) - E(U2[i],U2[j]));
+      }
+    }
+    FRHR /= comb(N);
+    return 1.0 - FRHR;
   }
 
 };

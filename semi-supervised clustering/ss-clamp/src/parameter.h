@@ -39,9 +39,6 @@ struct Parameter {
   double relevance_v;
   // percentage of labeled data
   double label;
-  // self training constasts
-  double self_training_in;
-  double self_training_out;
   // priori cluster for labeled data
   vector<Cluster> priori_cluster;
   // pairwise constraint restrictions
@@ -78,9 +75,7 @@ struct Parameter {
       "prototypes,"
       "eps,"
       "relevance_v,"
-      "iterations,"
-      "self_training_in,"
-      "self_training_out)"
+      "iterations)"
       "VALUES(" +
       string("\"" + sha1 + "\"") + "," +
       string("\"" + info + "\"") + "," +
@@ -95,9 +90,7 @@ struct Parameter {
       Util::cast<string>(P) + "," +
       Util::cast<string>(eps_for_criterion) + "," +
       Util::cast<string>(relevance_v) + "," +
-      Util::cast<string>(maximum_iteration) + "," +
-      Util::cast<string>(self_training_in) + "," +
-      Util::cast<string>(self_training_out) +
+      Util::cast<string>(maximum_iteration) +
       ");";
     database.execute(sql);
     // save input files
@@ -119,6 +112,85 @@ struct Parameter {
     sha1 = sha1::process(sha1);  
   }
 
+  void generate_pwc(string pwc_file, unsigned int known) {
+    this->pwc_file = pwc_file;
+    input.push_back(pwc_file);
+    ASSERT(class_variable >= 0, "the data should be labeled");
+    // all pairs
+    vector<Pair> pairs;
+    for(unsigned int i = 0; i < N; ++i) {
+      for(unsigned int j = i + 1; j < N; ++j) {
+        pairs.push_back(Pair(i,j));
+      }
+    }
+    // set label
+    if(known > pairs.size()) {
+      known = pairs.size();
+    }
+    label = (double)(known) / pairs.size();
+    // randomize pairs
+    MersenneTwister random(time(0));
+    for(unsigned int i = pairs.size() - 1; i > 0; --i) {
+      swap(pairs[i], pairs[random.next_int(i+1)]);
+    }
+    // load label info
+    vector<int> class_id(N, -1);
+    for(unsigned int p = 0; p < priori_cluster.size(); ++p) {
+      for(unsigned int i = 0; i < N; ++i) {
+        if(priori_cluster[p].count(i)) {
+          ASSERT(class_id[i] == -1, "clusters should be disjointed");
+          class_id[i] = p;
+        }
+      }
+    }
+    must_link.clear();
+    cannot_link.clear();
+    dbg(N);
+    dbg(pairs.size());
+    dbg(known);
+    dbg(label);
+    for(unsigned int i = 0; i < known; ++i) {
+      unsigned int a = pairs[i].first, b = pairs[i].second;
+      if(class_id[a] == class_id[b]) {
+        must_link.insert(Pair(a,b));
+        must_link.insert(Pair(b,a));
+      } else {
+        cannot_link.insert(Pair(a,b));
+        cannot_link.insert(Pair(b,a));
+      }
+    }
+    dbg(must_link.size());
+    dbg(cannot_link.size());
+    ofstream out(pwc_file.c_str(), ios::out);
+    VALIDATE_FILE(out, pwc_file);
+    out << "PAIRWISE_CONSTRAINTS = (" "\n"
+      "INFO = (" "\n"
+      "\t" "percentage = " << label << "," "\n"
+      "\t" "must_link = " << must_link.size() << "," "\n"
+      "\t" "cannot_link = " << cannot_link.size() << "," "\n"
+      ")," "\n"
+      "MUST_LINK = (" "\n";
+    for(unsigned int i = 0; i < known; ++i) {
+      unsigned int a = pairs[i].first, b = pairs[i].second;
+      if(class_id[a] == class_id[b]) {
+        out << "\t" "(" << a << "," << b << ")," "\n";
+        out << "\t" "(" << b << "," << a << ")," "\n";
+      }
+    }     
+    out << ")," "\n"
+      << "CANNOT_LINK = (" "\n";
+    for(unsigned int i = 0; i < known; ++i) {
+      unsigned int a = pairs[i].first, b = pairs[i].second;
+      if(class_id[a] != class_id[b]) {
+        out << "\t" "(" << a << "," << b << ")," "\n";
+        out << "\t" "(" << b << "," << a << ")," "\n";
+      }
+    }
+    out << "))" "\n"
+      << "END\n";
+    out.close();
+  }
+
   void set_default_values() {
     if(summary.count("[SEED]") == 0) {
       summary["[SEED]"].push_back(Util::cast<string>(time(NULL)));
@@ -128,12 +200,6 @@ struct Parameter {
     }
     if(summary.count("[RELEVANCE_V]") == 0) {
       summary["[RELEVANCE_V]"].push_back(Util::cast<string>((double)(1.0)));
-    }
-    if(summary.count("[SELF_TRAINING_IN]") == 0) {
-      summary["[SELF_TRAINING_IN]"].push_back(Util::cast<string>((double)(1.0)));
-    }
-    if(summary.count("[SELF_TRAINING_OUT]") == 0) {
-      summary["[SELF_TRAINING_OUT]"].push_back(Util::cast<string>((double)(0.0)));
     }
   }
 
@@ -170,9 +236,6 @@ struct Parameter {
     P = Util::cast<unsigned int>(summary["[PROTOTYPES]"][0]);
     // set alpha
     alpha = Util::cast<double>(summary["[ALPHA]"][0]);
-    // set self training constants
-    self_training_in = Util::cast<double>(summary["[SELF_TRAINING_IN]"][0]);
-    self_training_out = Util::cast<double>(summary["[SELF_TRAINING_OUT]"][0]);
     // set time limit
     // converted to seconds
     time_limit = 60000000ULL * Util::cast<double>(summary["[TIME_LIMIT]"][0]);
