@@ -14,8 +14,6 @@ CREATE TABLE IF NOT EXISTS algorithm (
     eps REAL,
     relevance_v REAL,
     iterations INTEGER,
-    self_training_in REAL,
-    self_training_out REAL,
     -- generated at the end
     used_pwc_file TEXT,
     used_clusters INTEGER,
@@ -41,7 +39,8 @@ CREATE TABLE IF NOT EXISTS answer (
     accuracy REAL,
     adjusted_rand_index REAL,
     f_measure REAL,
-    qr REAL,
+    fuzzy_rand_index_campello REAL,
+    fuzzy_rand_index_hullermeier REAL,
     PRIMARY KEY(algorithm_id,initialization,iteration),
     FOREIGN KEY(algorithm_id) REFERENCES algorithm(sha1)
     );
