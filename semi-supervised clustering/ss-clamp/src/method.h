@@ -34,7 +34,6 @@ struct Method {
     Matrix Relevance;
     // auxiliar
     vector<Prototype> prototype;
-    double beta;
     double eps;
     // compare function
     bool operator<(const Answer& answer) const {
@@ -42,9 +41,12 @@ struct Method {
     }
   };
 
+  bool check_before_update;
+
   Method(Parameter &params) : params(params) {
     timer.start_timer();
     random = MersenneTwister(params.seed);
+    check_before_update = true;
   }
 
   void save_iteration(Answer &answer, string key) {
@@ -142,13 +144,15 @@ struct Method {
     update_clusters(answer);
     double old_criterion = answer.criterion;
     answer.criterion = compute_criterion(answer);
-    double new_criterion = answer.criterion;	
-    ASSERT(
-        new_criterion <= old_criterion or log(fabs(new_criterion - old_criterion)) <= answer.eps,
-        "failed to minimize criterion"
-        "(old=" + Util::cast<string>(old_criterion) + 
-        ",new=" + Util::cast<string>(new_criterion) + ")"
-        );
+    double new_criterion = answer.criterion;
+    if(check_before_update) {
+      ASSERT(
+          new_criterion <= old_criterion or log(fabs(new_criterion - old_criterion)) <= answer.eps,
+          "failed to minimize criterion"
+          "(old=" + Util::cast<string>(old_criterion) + 
+          ",new=" + Util::cast<string>(new_criterion) + ")"
+          );
+    }
     answer.criterion = new_criterion;
     if(fabs(new_criterion - old_criterion) > answer.eps) {
       ++answer.iteration;

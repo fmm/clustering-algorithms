@@ -5,6 +5,8 @@
 #include "ssclampsumglobal.h"
 #include "ssclampsumlocal.h"
 
+#include "sscard.h"
+
 int main(int argc, char *argv[]) {
 
   string config;
@@ -61,11 +63,13 @@ int main(int argc, char *argv[]) {
 
   //return 0;
 
-  //SSClamp algo(p);
-  //SSClampProductGlobal algo(p);
-  SSClampProductLocal algo(params);
-  //SSClampSumGlobal algo(p); // best weight
-  //SSClampSumLocal algo(p);
+  //SSClamp algo(params);
+  //SSClampProductGlobal algo(params);
+  //SSClampProductLocal algo(params);
+  //SSClampSumGlobal algo(params); // best weight
+  //SSClampSumLocal algo(params);
+
+  SSCARD algo(params);
   
   Method::Answer ans = algo.process();
 
