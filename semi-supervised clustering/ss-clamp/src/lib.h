@@ -58,7 +58,7 @@ void __assert(bool _condition, string _message, const char* _file, int _line) {
 // for general usage
 typedef vector<double> Row;
 typedef vector<Row> Matrix;
-typedef set< unsigned int, less<unsigned int> > Cluster;
+typedef unordered_set<unsigned int> Cluster; 
 typedef vector<unsigned int> Prototype;
 typedef pair<unsigned int,unsigned int> Pair;
 
