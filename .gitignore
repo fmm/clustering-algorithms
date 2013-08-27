@@ -12,6 +12,7 @@
 *.a
 
 # Other uninteresting files
+*gch
 *~
 *.db
 *-journal
