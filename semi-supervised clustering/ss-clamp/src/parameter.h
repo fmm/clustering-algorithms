@@ -3,6 +3,7 @@
 
 #include "database.h"
 #include "lib.h"
+#include "mersennetwister.h"
 #include "sha1.h"
 
 struct Parameter {
