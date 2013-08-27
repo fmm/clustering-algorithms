@@ -87,7 +87,6 @@ struct SSCARD : public Method {
     // update partition
     update_clusters(answer);
     answer.criterion = compute_criterion(answer);
-    dbg(answer.initialization);
   }
 
   virtual bool optimize(Answer &answer) {
