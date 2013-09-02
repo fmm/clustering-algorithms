@@ -15,8 +15,8 @@ struct Parameter {
   string info;
   // seed used for the random generator
   time_t seed;
-  // index of the position of the priori cluster on "RECTANGLE_MATRIX" (0-based)
-  // -1 for unlabeled data
+  // index of the position of the priori cluster on "RECTANGLE_MATRIX"
+  // 0 for unlabeled data
   unsigned int class_variable;
   // number of initizalizations
   unsigned int initialization;
@@ -116,7 +116,6 @@ struct Parameter {
   void generate_pwc(string pwc_file, unsigned int known) {
     this->pwc_file = pwc_file;
     input.push_back(pwc_file);
-    ASSERT(class_variable >= 0, "the data should be labeled");
     // all pairs
     vector<Pair> pairs;
     for(unsigned int i = 0; i < N; ++i) {
@@ -248,6 +247,7 @@ struct Parameter {
     input = summary["[INPUT]"];
     N = 0;
     for(unsigned int i = 0; i < input.size(); ++i) {
+      // TODO: add .raw file support
       if(Util::ends_with(input[i],".sds")) {
         if(N <= 0) {
           // set number of individuals
