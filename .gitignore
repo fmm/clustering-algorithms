@@ -12,6 +12,8 @@
 *.a
 
 # Other uninteresting files
+*csv
+*ods
 *gch
 *~
 *.db
