@@ -113,25 +113,19 @@ struct Parameter {
     sha1 = sha1::process(sha1);  
   }
 
-  void generate_pwc(string pwc_file, unsigned int known) {
+  void generate_pwc(string pwc_file, double known) {
     this->pwc_file = pwc_file;
+    this->label = known;
     input.push_back(pwc_file);
-    // all pairs
-    vector<Pair> pairs;
+    // (individual,class) pairs
+    vector<unsigned int> objects(N);
     for(unsigned int i = 0; i < N; ++i) {
-      for(unsigned int j = i + 1; j < N; ++j) {
-        pairs.push_back(Pair(i,j));
-      }
+      objects[i] = i;
     }
-    // set label
-    if(known > pairs.size()) {
-      known = pairs.size();
-    }
-    label = (double)(known) / pairs.size();
-    // randomize pairs
+    // randomize the pairs
     MersenneTwister random(time(0));
-    for(unsigned int i = pairs.size() - 1; i > 0; --i) {
-      swap(pairs[i], pairs[random.next_int(i+1)]);
+    for(unsigned int i = N-1; i > 0; --i) {
+      swap(objects[i], objects[random.next_int(i+1)]);
     }
     // load label info
     vector<int> class_id(N, -1);
@@ -145,18 +139,18 @@ struct Parameter {
     }
     must_link.clear();
     cannot_link.clear();
-    dbg(N);
-    dbg(pairs.size());
-    dbg(known);
-    dbg(label);
-    for(unsigned int i = 0; i < known; ++i) {
-      unsigned int a = pairs[i].first, b = pairs[i].second;
-      if(class_id[a] == class_id[b]) {
-        must_link.insert(Pair(a,b));
-        must_link.insert(Pair(b,a));
-      } else {
-        cannot_link.insert(Pair(a,b));
-        cannot_link.insert(Pair(b,a));
+    unsigned int pairs = N * known / 100.0;
+    ASSERT(pairs <= N, "label was invalid");
+    for(unsigned int i = 0; i < pairs; ++i) {
+      for(unsigned int j = i+1; j < pairs; ++j) {
+        unsigned int a = objects[i], b = objects[j];
+        if(class_id[a] == class_id[b]) {
+          must_link.insert(Pair(a,b));
+          must_link.insert(Pair(b,a));
+        } else {
+          cannot_link.insert(Pair(a,b));
+          cannot_link.insert(Pair(b,a));
+        }
       }
     }
     dbg(must_link.size());
@@ -170,20 +164,24 @@ struct Parameter {
       "\t" "cannot_link = " << cannot_link.size() << "," "\n"
       ")," "\n"
       "MUST_LINK = (" "\n";
-    for(unsigned int i = 0; i < known; ++i) {
-      unsigned int a = pairs[i].first, b = pairs[i].second;
-      if(class_id[a] == class_id[b]) {
-        out << "\t" "(" << a << "," << b << ")," "\n";
-        out << "\t" "(" << b << "," << a << ")," "\n";
+    for(unsigned int i = 0; i < pairs; ++i) {
+      for(unsigned int j = i+1; j < pairs; ++j) {
+        unsigned int a = objects[i], b = objects[j];
+        if(class_id[a] == class_id[b]) {
+          out << "\t" "(" << a << "," << b << ")," "\n";
+          out << "\t" "(" << b << "," << a << ")," "\n";
+        }
       }
     }     
     out << ")," "\n"
       << "CANNOT_LINK = (" "\n";
-    for(unsigned int i = 0; i < known; ++i) {
-      unsigned int a = pairs[i].first, b = pairs[i].second;
-      if(class_id[a] != class_id[b]) {
-        out << "\t" "(" << a << "," << b << ")," "\n";
-        out << "\t" "(" << b << "," << a << ")," "\n";
+    for(unsigned int i = 0; i < pairs; ++i) {
+      for(unsigned int j = i+1; j < pairs; ++j) {
+        unsigned int a = objects[i], b = objects[j];
+        if(class_id[a] != class_id[b]) {
+          out << "\t" "(" << a << "," << b << ")," "\n";
+          out << "\t" "(" << b << "," << a << ")," "\n";
+        }
       }
     }
     out << "))" "\n"
