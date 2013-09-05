@@ -43,7 +43,7 @@ struct Parameter {
   // priori cluster for labeled data
   vector<Cluster> priori_cluster;
   // pairwise constraint restrictions
-  set<Pair> must_link, cannot_link;
+  unordered_set<Pair> must_link, cannot_link;
   // source files
   vector<string> input;
   string pwc_file;

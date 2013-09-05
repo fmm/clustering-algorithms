@@ -62,6 +62,16 @@ typedef unordered_set<unsigned int> Cluster;
 typedef vector<unsigned int> Prototype;
 typedef pair<unsigned int,unsigned int> Pair;
 
+// hash function for pair of integers
+namespace std {
+  template<> struct hash<Pair> {
+    inline size_t operator()(const Pair& p) const {
+      std::hash<unsigned long long> hasher;
+      return hasher((unsigned long long) p.first << 32 ^ p.second);
+    }
+  };
+}
+
 // constants
 const int inf = ~0u >> 2;
 const double INF = 1e100;
