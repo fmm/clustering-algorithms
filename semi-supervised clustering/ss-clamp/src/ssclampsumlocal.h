@@ -16,8 +16,8 @@ struct SSClampSumLocal : public SSClamp {
     }
   }
 
-  virtual inline double dissimilarity(Answer &answer, unsigned int i, unsigned int j, unsigned int k, unsigned int t) {
-    return params.table[t][i][j] * pow(answer.Relevance[k][t], params.relevance_v);
+  virtual inline double relevance(Answer &answer, unsigned int k, unsigned int t) {
+    return pow(answer.Relevance[k][t], params.relevance_v);
   }
 
   virtual void update_relevance(Answer& answer) {

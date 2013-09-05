@@ -8,9 +8,47 @@ struct SSClamp : public Method {
   // constructor
   SSClamp(Parameter &params) : Method(params) {
   }
+  
+  virtual inline vector<double> classify(Answer &answer, Matrix &table) {
+    ASSERT(table.size() == params.T, "unexpected number of tables");
+    ASSERT(table[0].size() == params.N, "unexpected number of individuals");
+    vector<double> dist(params.C,0.0), u(params.C,0.0);
+    for(unsigned int t = 0; t < params.T; ++t) {
+      for(unsigned int k = 0; k < params.C; ++k) {
+        for(unsigned int p = 0; p < params.P; ++p) {
+          dist[k] += table[t][answer.prototype[k][p]] * relevance(answer, k, t);
+        }
+      }
+    }
+    vector<int> is_zero;
+    for(unsigned int k = 0; k < params.C; ++k) {
+      if(Util::cmp(dist[k]) <= 0) {
+        is_zero.push_back(k);
+      }
+    }
+    if(is_zero.size()) {
+      for(unsigned int k = 0; k < is_zero.size(); ++k) {
+        u[is_zero[k]] = 1.0 / is_zero.size();
+      }
+    } else {
+      for(unsigned int k = 0; k < params.C; ++k) {
+        for(unsigned int h = 0; h < params.C; ++h) {
+          VALIDATE_DENOMINATOR(dist[h]);
+          u[k] += dist[k] / dist[h];
+        }
+        VALIDATE_DENOMINATOR(u[k]);
+        u[k] = 1.0 / u[k];
+      }
+    }
+    return u;
+  }
 
-  virtual inline double dissimilarity(Answer &answer, unsigned int i, unsigned int j, unsigned int k, unsigned int t) {
-    return params.table[t][i][j] * answer.Relevance[k][t];
+  virtual inline double relevance(Answer &answer, unsigned int k, unsigned int t) {
+    return answer.Relevance[k][t];
+  }
+
+  inline double dissimilarity(Answer &answer, unsigned int i, unsigned int j, unsigned int k, unsigned int t) {
+    return params.table[t][i][j] * relevance(answer, k, t);
   }
 
   virtual double compute_criterion(Answer &answer) {
