@@ -15,10 +15,6 @@ CREATE TABLE IF NOT EXISTS algorithm (
     relevance_v REAL,
     iterations INTEGER,
     -- generated at the end
-    used_pwc_file TEXT,
-    used_clusters INTEGER,
-    used_prototypes INTEGER,
-    used_alpha REAL,
     best_initialization INTEGER,
     PRIMARY KEY(sha1)
     );

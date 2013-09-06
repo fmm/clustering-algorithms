@@ -82,19 +82,21 @@ struct Method {
     string sql = "";
     // save partition
     for(unsigned int i = 0; i < params.N; ++i) {
-      for(unsigned int k = 0; k < params.C; ++k) {
-        sql = "INSERT INTO partition("
-          "algorithm_id,"
-          "individual,"
-          "cluster,"
-          "value)"
-          "VALUES(" +
-          string("\"" + key + "\"") + "," +
-          Util::cast<string>(i) + "," +
-          Util::cast<string>(k) + "," +
-          Util::cast<string>(answer.U[i][k]) +
-          ");";
-        params.database.execute(sql);
+      if(params.mask[i]) {
+        for(unsigned int k = 0; k < params.C; ++k) {
+          sql = "INSERT INTO partition("
+            "algorithm_id,"
+            "individual,"
+            "cluster,"
+            "value)"
+            "VALUES(" +
+            string("\"" + key + "\"") + "," +
+            Util::cast<string>(i) + "," +
+            Util::cast<string>(k) + "," +
+            Util::cast<string>(answer.U[i][k]) +
+            ");";
+          params.database.execute(sql);
+        }
       }
     }
     // save relevance vector
@@ -116,10 +118,6 @@ struct Method {
     }
     // update parameters used during the algorithm
     sql = "UPDATE algorithm SET "
-      "used_pwc_file=\"" + params.pwc_file + "\"," +
-      "used_clusters=" + Util::cast<string>(params.C) + "," +
-      "used_prototypes=" + Util::cast<string>(params.P) + "," + 
-      "used_alpha=" + Util::cast<string>(params.alpha) + "," +
       "best_initialization=" + Util::cast<string>(answer.initialization) + " " +
       "WHERE sha1=\"" + key + "\";";
     params.database.execute(sql);
@@ -167,11 +165,13 @@ struct Method {
       answer.cluster[k].clear();
     }
     for(unsigned int i = 0; i < params.N; ++i) {
-      vector< pair<double,int> > v(params.C);
-      for(unsigned int k = 0; k < params.C; ++k) {
-        v[k] = make_pair(answer.U[i][k],k);
+      if(params.mask[i]) {
+        vector< pair<double,int> > v(params.C);
+        for(unsigned int k = 0; k < params.C; ++k) {
+          v[k] = make_pair(answer.U[i][k],k);
+        }
+        answer.cluster[max_element(v.begin(),v.end())->second].insert(i);
       }
-      answer.cluster[max_element(v.begin(),v.end())->second].insert(i);
     }
   }
 
@@ -181,29 +181,45 @@ struct Method {
     vector< vector<unsigned int> > table(k+1,vector<unsigned int>(p+1,0));
     for(unsigned int i = 0; i < k; ++i) {
       for(unsigned int j = 0; j < p; ++j) {
-        for(Cluster::const_iterator iter = answer.cluster[i].begin(); iter != answer.cluster[i].end(); iter++) {
-          table[i][j] += params.priori_cluster[j].count(*iter);
+        for(auto iter : answer.cluster[i]) {
+          if(params.mask[iter]) {
+            table[i][j] += params.priori_cluster[j].count(iter);
+          }
         }
       }
     }
     for(unsigned int i = 0; i < k; ++i) {
-      table[i][p] = answer.cluster[i].size();
+      for(auto iter : answer.cluster[i]) {
+        if(params.mask[iter]) {
+          table[i][p]++;
+        }
+      }
     }
     for(unsigned int j = 0; j < p; ++j) {
-      table[k][j] = params.priori_cluster[j].size();
+      for(auto iter : params.priori_cluster[j]) {
+        if(params.mask[iter]) {
+          table[k][j]++;
+        }
+      }
     }
-    table[k][p] = params.N;
+    for(unsigned int i = 0; i < params.N; i++) {
+      if(params.mask[i]) {
+        table[k][p]++;
+      }
+    }
     return table;
   }
 
   const Matrix compute_priori_matrix() {
-    Matrix Priori(params.N,Row(params.C,0));
+    Matrix priori(params.N,Row(params.C,0));
     for(unsigned int i = 0; i < params.N; ++i) {
-      for(unsigned int k = 0; k < params.C; ++k) {
-        Priori[i][k] = params.priori_cluster.size() > k and params.priori_cluster[k].count(i);
+      if(params.mask[i]) {
+        for(unsigned int k = 0; k < params.C; ++k) {
+          priori[i][k] = params.priori_cluster.size() > k and params.priori_cluster[k].count(i);
+        }
       }
     }
-    return Priori;
+    return priori;
   }
 
   string status(double percentage) {
@@ -236,7 +252,6 @@ struct Method {
     return message.str();
   }
 
-  // TODO: considering that every values is already defined
   Answer process() {
     // hash of the execution
     const string key = params.sha1;

@@ -48,6 +48,7 @@ struct SSClamp : public Method {
   }
 
   inline double dissimilarity(Answer &answer, unsigned int i, unsigned int j, unsigned int k, unsigned int t) {
+    ASSERT(params.mask[i] and params.mask[j], "invalid individuals");
     return params.table[t][i][j] * relevance(answer, k, t);
   }
 
@@ -56,32 +57,40 @@ struct SSClamp : public Method {
     Matrix d(params.N,Row(params.C,0));
     for(unsigned int t = 0; t < params.T; ++t) {
       for(unsigned int i = 0; i < params.N; ++i) {
-        for(unsigned int k = 0; k < params.C; ++k) {
-          for(unsigned int p = 0; p < params.P; ++p) {
-            d[i][k] += dissimilarity(answer, i, answer.prototype[k][p], k, t);
+        if(params.mask[i]) {
+          for(unsigned int k = 0; k < params.C; ++k) {
+            for(unsigned int p = 0; p < params.P; ++p) {
+              d[i][k] += dissimilarity(answer, i, answer.prototype[k][p], k, t);
+            }
           }
         }
       }
     }
     for(unsigned int i = 0; i < params.N; ++i) {
-      for(unsigned int k = 0; k < params.C; ++k) {
-        criterion += pow(answer.U[i][k], 2.0) * d[i][k];
+      if(params.mask[i]) {
+        for(unsigned int k = 0; k < params.C; ++k) {
+          criterion += pow(answer.U[i][k], 2.0) * d[i][k];
+        }
       }
     }
-    for(auto x = params.must_link.begin(); x != params.must_link.end(); x++) {
-      unsigned int l = x->first, m = x->second;
-      for(unsigned int r = 0; r < params.C; ++r) {
-        for(unsigned int s = 0; s < params.C; ++s) {
-          if(r != s) {
-            restriction += answer.U[l][r] * answer.U[m][s];
+    for(auto x : params.must_link) {
+      unsigned int l = x.first, m = x.second;
+      if(params.mask[l] and params.mask[m]) {
+        for(unsigned int r = 0; r < params.C; ++r) {
+          for(unsigned int s = 0; s < params.C; ++s) {
+            if(r != s) {
+              restriction += answer.U[l][r] * answer.U[m][s];
+            }
           }
         }
       }
     }
-    for(auto x = params.cannot_link.begin(); x != params.cannot_link.end(); x++) {
-      unsigned int l = x->first, m = x->second;
-      for(unsigned int r = 0; r < params.C; ++r) {
-        restriction += answer.U[l][r] * answer.U[m][r];
+    for(auto x : params.cannot_link) {
+      unsigned int l = x.first, m = x.second;
+      if(params.mask[l] and params.mask[m]) {
+        for(unsigned int r = 0; r < params.C; ++r) {
+          restriction += answer.U[l][r] * answer.U[m][r];
+        }
       }
     }
     answer.restriction = restriction;
@@ -102,17 +111,19 @@ struct SSClamp : public Method {
   }
 
   virtual void srand(Answer &answer) {
+    // random prototype
+    vector<unsigned int> new_prototype;
+    for(unsigned int i = 0; i < params.N; ++i) {
+      if(params.mask[i]) {
+        new_prototype.push_back(i);
+      }
+    }
     ASSERT(
-        params.C * params.P <= params.N,
+        params.C * params.P <= new_prototype.size(),
         "invalid number of prototypes"
         );
-    // random prototype
-    vector<unsigned int> new_prototype(params.N);
-    for(unsigned int i = 0; i < params.N; ++i) {
-      new_prototype[i] = i;
-    }
     // randomize vector
-    for (unsigned int i = 0; i < params.N; ++i) {
+    for (unsigned int i = 0; i < new_prototype.size(); ++i) {
       unsigned int j = random.rand_unsigned() % (i + 1);
       swap(new_prototype[i],new_prototype[j]);
     }
@@ -126,36 +137,38 @@ struct SSClamp : public Method {
     set_default_relevance(answer);
     // initial fuzzy partition
     for(unsigned int i = 0; i < params.N; ++i) {
-      vector<double> dist(params.C,0.0);
-      for(unsigned int t = 0; t < params.T; ++t) {
-        for(unsigned int k = 0; k < params.C; ++k) {
-          for(unsigned int p = 0; p < params.P; ++p) {
-            dist[k] += dissimilarity(answer, i, answer.prototype[k][p], k, t);
+      if(params.mask[i]) {
+        vector<double> dist(params.C,0.0);
+        for(unsigned int t = 0; t < params.T; ++t) {
+          for(unsigned int k = 0; k < params.C; ++k) {
+            for(unsigned int p = 0; p < params.P; ++p) {
+              dist[k] += dissimilarity(answer, i, answer.prototype[k][p], k, t);
+            }
           }
         }
-      }
-      vector<int> is_zero;
-      for(unsigned int k = 0; k < params.C; ++k) {
-        if(Util::cmp(dist[k]) <= 0) {
-          is_zero.push_back(k);
-        }
-      }
-      if(is_zero.size()) {
+        vector<int> is_zero;
         for(unsigned int k = 0; k < params.C; ++k) {
-          answer.U[i][k] = 0.0;
-        }
-        for(unsigned int k = 0; k < is_zero.size(); ++k) {
-          answer.U[i][is_zero[k]] = 1.0 / is_zero.size();
-        }
-      } else {
-        for(unsigned int k = 0; k < params.C; ++k) {
-          answer.U[i][k] = 0;
-          for(unsigned int h = 0; h < params.C; ++h) {
-            VALIDATE_DENOMINATOR(dist[h]);
-            answer.U[i][k] += dist[k] / dist[h];
+          if(Util::cmp(dist[k]) <= 0) {
+            is_zero.push_back(k);
           }
-          VALIDATE_DENOMINATOR(answer.U[i][k]);
-          answer.U[i][k] = 1.0 / answer.U[i][k];
+        }
+        if(is_zero.size()) {
+          for(unsigned int k = 0; k < params.C; ++k) {
+            answer.U[i][k] = 0.0;
+          }
+          for(unsigned int k = 0; k < is_zero.size(); ++k) {
+            answer.U[i][is_zero[k]] = 1.0 / is_zero.size();
+          }
+        } else {
+          for(unsigned int k = 0; k < params.C; ++k) {
+            answer.U[i][k] = 0;
+            for(unsigned int h = 0; h < params.C; ++h) {
+              VALIDATE_DENOMINATOR(dist[h]);
+              answer.U[i][k] += dist[k] / dist[h];
+            }
+            VALIDATE_DENOMINATOR(answer.U[i][k]);
+            answer.U[i][k] = 1.0 / answer.U[i][k];
+          }
         }
       }
     }
@@ -175,14 +188,20 @@ struct SSClamp : public Method {
       vector<double> dist(params.N,0.0);
       for(unsigned int t = 0; t < params.T; ++t) {
         for(unsigned int i = 0; i < params.N; ++i) {
-          for(unsigned int j = 0; j < params.N; ++j) {
-            dist[i] += dissimilarity(answer, i, j, k, t) * pow(answer.U[j][k],2.0);
+          if(params.mask[i]) {
+            for(unsigned int j = 0; j < params.N; ++j) {
+              if(params.mask[j]) {
+                dist[i] += dissimilarity(answer, i, j, k, t) * pow(answer.U[j][k],2.0);
+              }
+            }
           }
         }
       }
-      vector< pair<double,int> > v(params.N);
+      vector< pair<double,int> > v;
       for(unsigned int i = 0; i < params.N; ++i) {
-        v[i] = make_pair(dist[i], i);
+        if(params.mask[i]) {
+          v.push_back(make_pair(dist[i], i));
+        }
       }
       nth_element(v.begin(),v.begin()+params.P,v.end());
       for(unsigned int p = 0; p < params.P; ++p) {
@@ -195,130 +214,136 @@ struct SSClamp : public Method {
 
   void update_membership(Answer& answer) {
     for(unsigned int i = 0; i < params.N; ++i) {
-      vector<double> a(params.C,0), b(params.C,0);
-      // compute a[]
-      for(unsigned int k = 0; k < params.C; ++k) {
-        for(unsigned int t = 0; t < params.T; ++t) {
-          for(unsigned int p = 0; p < params.P; ++p) {
-            a[k] += dissimilarity(answer, i, answer.prototype[k][p], k, t);
-          }
-        }
-      }
-      // compute b[]
-      for(unsigned int m = 0; m < params.N; ++m) {
-        // must link
-        if(params.must_link.count(Pair(i,m))) {
-          for(unsigned int r = 0; r < params.C; ++r) {
-            for(unsigned int s = 0; s < params.C; ++s) {
-              if(r != s) {
-                b[r] += answer.U[m][s];
-              }
-            }
-          }
-        }
-        // cannot link
-        if(params.cannot_link.count(Pair(i,m))) {
-          for(unsigned int r = 0; r < params.C; ++r) {
-            b[r] += answer.U[m][r];
-          }
-        }
-      }
-      for(unsigned int l = 0; l < params.N; ++l) {
-        // must link
-        if(params.must_link.count(Pair(l,i))) {
-          for(unsigned int r = 0; r < params.C; ++r) {
-            for(unsigned int s = 0; s < params.C; ++s) {
-              if(r != s) {
-                b[s] += answer.U[l][r];
-              }
-            }
-          }
-        }
-        // cannot link
-        if(params.cannot_link.count(Pair(l,i))) {
-          for(unsigned int s = 0; s < params.C; ++s) {
-            b[s] += answer.U[l][s];
-          }
-        }
-      }    
-      for(unsigned int k = 0; k < params.C; ++k) {
-        a[k] *= 2;
-        b[k] *= params.alpha;
-      }
-      vector<unsigned int> V;
-      for(unsigned int k = 0; k < params.C; ++k) {
-        if(Util::cmp(a[k]) <= 0) {
-          V.push_back(k);
-        }
-      }
-      if(V.size()) {
-        // maximize membership for a[k]=0 in order to do this gamma must be
-        // the minimum b[k] for all k with a[k]=0 
-        double gamma = INF;
-        for(unsigned int k = 0; k < V.size(); ++k) {
-          gamma = min(gamma, b[V[k]]);
-        }
-        double membership = 1.0;
+      if(params.mask[i]) {
+        vector<double> a(params.C,0), b(params.C,0);
+        // compute a[]
         for(unsigned int k = 0; k < params.C; ++k) {
-          if(Util::cmp(a[k]) > 0) {
-            if(Util::cmp(gamma,b[k]) >= 0) {
-              answer.U[i][k] = (gamma - b[k]) / a[k];
-            } else {
-              answer.U[i][k] = 0.0;
+          for(unsigned int t = 0; t < params.T; ++t) {
+            for(unsigned int p = 0; p < params.P; ++p) {
+              a[k] += dissimilarity(answer, i, answer.prototype[k][p], k, t);
             }
-            membership -= answer.U[i][k];
           }
         }
-        if(Util::cmp(membership) >= 0) {
-          // the sum should be equal to `membership'
-          // here this value is being equally distributed
+        // compute b[]
+        for(unsigned int m = 0; m < params.N; ++m) {
+          if(params.mask[m]) {
+            // must link
+            if(params.must_link.count(Pair(i,m))) {
+              for(unsigned int r = 0; r < params.C; ++r) {
+                for(unsigned int s = 0; s < params.C; ++s) {
+                  if(r != s) {
+                    b[r] += answer.U[m][s];
+                  }
+                }
+              }
+            }
+            // cannot link
+            if(params.cannot_link.count(Pair(i,m))) {
+              for(unsigned int r = 0; r < params.C; ++r) {
+                b[r] += answer.U[m][r];
+              }
+            }
+          }
+        }
+        for(unsigned int l = 0; l < params.N; ++l) {
+          if(params.mask[l]) {
+            // must link
+            if(params.must_link.count(Pair(l,i))) {
+              for(unsigned int r = 0; r < params.C; ++r) {
+                for(unsigned int s = 0; s < params.C; ++s) {
+                  if(r != s) {
+                    b[s] += answer.U[l][r];
+                  }
+                }
+              }
+            }
+            // cannot link
+            if(params.cannot_link.count(Pair(l,i))) {
+              for(unsigned int s = 0; s < params.C; ++s) {
+                b[s] += answer.U[l][s];
+              }
+            }
+          }
+        }
+        for(unsigned int k = 0; k < params.C; ++k) {
+          a[k] *= 2;
+          b[k] *= params.alpha;
+        }
+        vector<unsigned int> V;
+        for(unsigned int k = 0; k < params.C; ++k) {
+          if(Util::cmp(a[k]) <= 0) {
+            V.push_back(k);
+          }
+        }
+        if(V.size()) {
+          // maximize membership for a[k]=0 in order to do this gamma must be
+          // the minimum b[k] for all k with a[k]=0 
+          double gamma = INF;
           for(unsigned int k = 0; k < V.size(); ++k) {
-            answer.U[i][V[k]] = membership / V.size();
+            gamma = min(gamma, b[V[k]]);
           }
-          V.clear();
-        } else {
-          // the b[k] greater equal than gamma should have membership
-          // value equal to zero according to the Kuhn-Tucker conditions
-          V = vector<unsigned int>(params.C,true);
+          double membership = 1.0;
           for(unsigned int k = 0; k < params.C; ++k) {
-            if(Util::cmp(b[k],gamma) >= 0) {
-              answer.U[i][k] = 0.0;
-              V[k] = false;
+            if(Util::cmp(a[k]) > 0) {
+              if(Util::cmp(gamma,b[k]) >= 0) {
+                answer.U[i][k] = (gamma - b[k]) / a[k];
+              } else {
+                answer.U[i][k] = 0.0;
+              }
+              membership -= answer.U[i][k];
             }
           }
+          if(Util::cmp(membership) >= 0) {
+            // the sum should be equal to `membership'
+            // here this value is being equally distributed
+            for(unsigned int k = 0; k < V.size(); ++k) {
+              answer.U[i][V[k]] = membership / V.size();
+            }
+            V.clear();
+          } else {
+            // the b[k] greater equal than gamma should have membership
+            // value equal to zero according to the Kuhn-Tucker conditions
+            V = vector<unsigned int>(params.C,true);
+            for(unsigned int k = 0; k < params.C; ++k) {
+              if(Util::cmp(b[k],gamma) >= 0) {
+                answer.U[i][k] = 0.0;
+                V[k] = false;
+              }
+            }
+          }
+        } else {
+          V = vector<unsigned int>(params.C,true);
         }
-      } else {
-        V = vector<unsigned int>(params.C,true);
-      }
-      if(V.size()) {
-        while(true) {
-          bool updated = false;
-          double gamma = ({
-            double num = 0, den = 0;
+        if(V.size()) {
+          while(true) {
+            bool updated = false;
+            double gamma = ({
+              double num = 0, den = 0;
+              for(unsigned int k = 0; k < params.C; ++k) {
+                if(V[k]) {
+                  VALIDATE_DENOMINATOR(a[k]);
+                  num += (b[k] / a[k]);
+                  den += (1.0 / a[k]);
+                }
+              }
+              VALIDATE_DENOMINATOR(den);
+              (1.0 + num) / den;
+            });
             for(unsigned int k = 0; k < params.C; ++k) {
               if(V[k]) {
                 VALIDATE_DENOMINATOR(a[k]);
-                num += (b[k] / a[k]);
-                den += (1.0 / a[k]);
+                answer.U[i][k] = (gamma - b[k]) / a[k];
+                if(Util::cmp(answer.U[i][k]) <= 0) {
+                  V[k] = false;
+                  updated = true;
+                }
+              } else {
+                answer.U[i][k] = 0;
               }
             }
-            VALIDATE_DENOMINATOR(den);
-            (1.0 + num) / den;
-          });
-          for(unsigned int k = 0; k < params.C; ++k) {
-            if(V[k]) {
-              VALIDATE_DENOMINATOR(a[k]);
-              answer.U[i][k] = (gamma - b[k]) / a[k];
-              if(Util::cmp(answer.U[i][k]) <= 0) {
-                V[k] = false;
-                updated = true; 
-              }
-            } else {
-              answer.U[i][k] = 0;
+            if(!updated) {
+              break;
             }
-          }
-          if(!updated) {
-            break;
           }
         }
       }

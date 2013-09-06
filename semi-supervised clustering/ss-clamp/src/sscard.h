@@ -37,8 +37,8 @@ struct SSCARD : public Method {
       VALIDATE_DENOMINATOR(denominator);
       criterion += numerator / 2.0 / denominator;
     }
-    for(auto x = params.must_link.begin(); x != params.must_link.end(); x++) {
-      unsigned int l = x->first, m = x->second;
+    for(auto x : params.must_link) {
+      unsigned int l = x.first, m = x.second;
       for(unsigned int r = 0; r < params.C; ++r) {
         for(unsigned int s = 0; s < params.C; ++s) {
           if(r != s) {
@@ -47,8 +47,8 @@ struct SSCARD : public Method {
         }
       }
     }
-    for(auto x = params.cannot_link.begin(); x != params.cannot_link.end(); x++) {
-      unsigned int l = x->first, m = x->second;
+    for(auto x : params.cannot_link) {
+      unsigned int l = x.first, m = x.second;
       for(unsigned int r = 0; r < params.C; ++r) {
         restriction += answer.U[l][r] * answer.U[m][r];
       }

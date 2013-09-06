@@ -24,6 +24,8 @@ struct Parameter {
   unsigned int maximum_iteration;
   // number of individuals
   unsigned int N;
+  // mask of individuals to be considered
+  vector<bool> mask;
   // number of clusters
   unsigned int C;
   // number of prototypes
@@ -103,12 +105,22 @@ struct Parameter {
       database.execute(sql);
     }
   }
+  
+  void update_multable() {
+    // update number of prototypes
+    summary["[PROTOTYPES]"].clear();
+    summary["[PROTOTYPES]"].push_back(Util::cast<string>(P));
+    // update the mask
+    summary["[MASK]"].clear();
+    summary["[MASK]"] = Util::cast<string>(mask);
+  }
 
   void generate_id() {
+    update_multable();
     sha1 = "";
-    for(map< string, vector<string> >::iterator iter = summary.begin(); iter != summary.end(); iter++){
-      sha1 += iter->first;
-      sha1 += accumulate(iter->second.begin(),iter->second.end(),string(":"));
+    for(auto iter : summary) {
+      sha1 += iter.first;
+      sha1 += accumulate(iter.second.begin(),iter.second.end(),string(":"));
     }
     sha1 = sha1::process(sha1);  
   }
@@ -117,6 +129,7 @@ struct Parameter {
     this->pwc_file = pwc_file;
     this->label = known;
     input.push_back(pwc_file);
+    summary["[INPUT]"].push_back(pwc_file);
     // (individual,class) pairs
     vector<unsigned int> objects(N);
     for(unsigned int i = 0; i < N; ++i) {
@@ -245,11 +258,12 @@ struct Parameter {
     input = summary["[INPUT]"];
     N = 0;
     for(unsigned int i = 0; i < input.size(); ++i) {
-      // TODO: add .raw file support
       if(Util::ends_with(input[i],".sds")) {
         if(N <= 0) {
           // set number of individuals
           read_individual_number(input[i]);
+          // set mask
+          mask = vector<bool>(N, true);
           if(class_variable > 0) {
             // set priori cluster
             read_priori_cluster(input[i]);

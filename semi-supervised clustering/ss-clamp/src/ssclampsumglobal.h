@@ -25,8 +25,10 @@ struct SSClampSumGlobal : public SSClamp {
     for(unsigned int t = 0; t < params.T; ++t) {
       for(unsigned int k = 0; k < params.C; ++k) {
         for(unsigned int i = 0; i < params.N; ++i) {
-          for(unsigned int p = 0; p < params.P; ++p) {
-            dist[t] += params.table[t][i][answer.prototype[k][p]] * pow(answer.U[i][k], 2.0);
+          if(params.mask[i]) {
+            for(unsigned int p = 0; p < params.P; ++p) {
+              dist[t] += params.table[t][i][answer.prototype[k][p]] * pow(answer.U[i][k], 2.0);
+            }
           }
         }
       }

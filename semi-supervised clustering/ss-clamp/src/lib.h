@@ -91,6 +91,13 @@ namespace Util {
     s >> b;
     return b;
   }
+  template<class S, class T> vector<S> cast(vector<T> a) {
+    vector<S> s;
+    for(unsigned int i = 0; i < a.size(); ++i) {
+      s.push_back(cast<S>(a[i]));
+    }
+    return s;
+  }
   bool ends_with(string a, string b) {
     return a.size() >= b.size() and a.substr(a.size() - b.size()) == b;
   }
