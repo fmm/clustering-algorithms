@@ -138,7 +138,7 @@ struct Parameter {
     // randomize the pairs
     MersenneTwister random(time(0));
     for(unsigned int i = 1; i < N; ++i) {
-      unsigned int j = random.rand_unsigned % (i + 1);
+      unsigned int j = random.rand_unsigned() % (i + 1);
       swap(objects[i], objects[j]);
     }
     // load label info
