@@ -123,7 +123,7 @@ struct SSClamp : public Method {
         "invalid number of prototypes"
         );
     // randomize vector
-    for (unsigned int i = 0; i < new_prototype.size(); ++i) {
+    for (unsigned int i = 1; i < new_prototype.size(); ++i) {
       unsigned int j = random.rand_unsigned() % (i + 1);
       swap(new_prototype[i],new_prototype[j]);
     }

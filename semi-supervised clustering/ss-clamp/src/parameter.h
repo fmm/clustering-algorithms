@@ -137,8 +137,9 @@ struct Parameter {
     }
     // randomize the pairs
     MersenneTwister random(time(0));
-    for(unsigned int i = N-1; i > 0; --i) {
-      swap(objects[i], objects[random.next_int(i+1)]);
+    for(unsigned int i = 1; i < N; ++i) {
+      unsigned int j = random.rand_unsigned % (i+1);
+      swap(objects[i], objects[j]);
     }
     // load label info
     vector<int> class_id(N, -1);
