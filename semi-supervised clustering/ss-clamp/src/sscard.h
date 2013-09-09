@@ -54,7 +54,7 @@ struct SSCARD : public Method {
       }
     }
     answer.restriction = restriction;
-    return criterion + params.alpha * restriction;
+    return criterion + answer.alpha * restriction;
   }
 
   virtual void initialize(Answer &answer, unsigned int init, unsigned int iter) {
@@ -286,7 +286,7 @@ struct SSCARD : public Method {
     for(unsigned int i = 0; i < params.N; ++i) {
       for(unsigned int k = 0; k < params.C; ++k) {
         if(Util::cmp(a[i][k]) > 0) {
-          u_const[i][k] = params.alpha * (ct[i] - c[i][k]) / a[i][k];
+          u_const[i][k] = answer.alpha * (ct[i] - c[i][k]) / a[i][k];
         }
       }
     }

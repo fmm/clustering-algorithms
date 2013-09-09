@@ -70,7 +70,6 @@ struct Parameter {
       "seed,"
       "time_limit,"
       "class_variable,"
-      "alpha,"
       "label_percentage,"
       "initializations,"
       "clusters,"
@@ -85,7 +84,6 @@ struct Parameter {
       Util::cast<string>(seed) + "," +
       Util::cast<string>(time_limit) + "," +
       Util::cast<string>(class_variable) + "," +
-      Util::cast<string>(alpha) + "," +
       Util::cast<string>(label) + "," +
       Util::cast<string>(initialization) + "," +
       Util::cast<string>(C) + "," +

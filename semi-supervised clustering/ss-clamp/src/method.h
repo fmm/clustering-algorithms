@@ -29,6 +29,7 @@ struct Method {
     unsigned int iteration;
     double criterion;
     double restriction;
+    double alpha;
     vector<Cluster> cluster;
     Matrix U;
     Matrix Relevance;
@@ -58,6 +59,7 @@ struct Method {
       "iteration,"
       "criterion,"
       "restriction,"
+      "alpha,"
       "accuracy,"
       "adjusted_rand_index,"
       "f_measure,"
@@ -69,6 +71,7 @@ struct Method {
       Util::cast<string>(answer.iteration) + "," +
       Util::cast<string>(answer.criterion) + "," +
       Util::cast<string>(answer.restriction) + "," +
+      Util::cast<string>(answer.alpha) + "," +
       Util::cast<string>(Validation::accuracy(confusing_matrix).first) + "," +
       Util::cast<string>(Validation::adjusted_rand_index(confusing_matrix)) + "," +
       Util::cast<string>(Validation::f_measure(confusing_matrix)) + "," +
@@ -128,6 +131,7 @@ struct Method {
     answer.iteration = iter;
     answer.criterion = INF;
     answer.restriction = INF;
+    answer.alpha = params.alpha;
     answer.cluster = vector<Cluster>(params.C);
     answer.U = Matrix(params.N,Row(params.C));
     answer.Relevance = Matrix(params.C,Row(params.T));

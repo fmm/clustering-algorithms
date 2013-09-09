@@ -94,7 +94,7 @@ struct SSClamp : public Method {
       }
     }
     answer.restriction = restriction;
-    return criterion + params.alpha * restriction;
+    return criterion + answer.alpha * restriction;
   }
 
   virtual void initialize(Answer &answer, unsigned int init, unsigned int iter) {
@@ -267,7 +267,7 @@ struct SSClamp : public Method {
         }
         for(unsigned int k = 0; k < params.C; ++k) {
           a[k] *= 2;
-          b[k] *= params.alpha;
+          b[k] *= answer.alpha;
         }
         vector<unsigned int> V;
         for(unsigned int k = 0; k < params.C; ++k) {
