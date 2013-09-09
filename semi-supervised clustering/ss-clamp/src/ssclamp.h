@@ -283,14 +283,17 @@ struct SSClamp : public Method {
             gamma = min(gamma, b[V[k]]);
           }
           double membership = 1.0;
+          V.clear();
           for(unsigned int k = 0; k < params.C; ++k) {
-            if(Util::cmp(a[k]) > 0) {
-              if(Util::cmp(gamma,b[k]) >= 0) {
+            if(Util::cmp(gamma,b[k]) >= 0) {
+              if(Util::cmp(a[k]) > 0) {
                 answer.U[i][k] = (gamma - b[k]) / a[k];
+                membership -= answer.U[i][k];
               } else {
-                answer.U[i][k] = 0.0;
+                V.push_back(k);
               }
-              membership -= answer.U[i][k];
+            } else {
+              answer.U[i][k] = 0.0;
             }
           }
           if(Util::cmp(membership) >= 0) {
