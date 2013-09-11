@@ -12,6 +12,7 @@ struct SSClampProductLocal : public SSClamp {
     for(unsigned int k = 0; k < params.C; ++k) {
       double num = 1.0;
       vector<double> denominator(params.T,0.0);
+      bool bad = false;
       for(unsigned int t = 0; t < params.T; ++t) {
         for(unsigned int i = 0; i < params.N; ++i) {
           if(params.mask[i]) {
@@ -20,11 +21,16 @@ struct SSClampProductLocal : public SSClamp {
             }
           }
         }
-        VALIDATE_DENOMINATOR(denominator[t]);
         num *= pow(denominator[t], 1.0 / params.T);
-      }			
-      for(unsigned int t = 0; t < params.T; ++t) {
-        answer.Relevance[k][t] = num / denominator[t];
+        if(!Util::cmp(denominator[t])) {
+          bad = true;
+        }
+      }
+      if(!bad) {
+        for(unsigned int t = 0; t < params.T; ++t) {
+          VALIDATE_DENOMINATOR(denominator[t]);
+          answer.Relevance[k][t] = num / denominator[t];
+        }
       }
     }
   }
