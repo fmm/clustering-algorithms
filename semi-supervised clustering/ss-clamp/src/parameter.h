@@ -354,6 +354,12 @@ struct Parameter {
       for(unsigned int j = 0; j <= i; ++j) {
         double d;
         VALIDATE_FILE(s>>d, file_name);
+#ifdef CHECK_NORMALIZED
+        ASSERT(
+            0  <= Util::cmp(d,0.0) and Util::cmp(d,1.0) <= 0,
+            "table in " + file_name + " is not normalized"
+            );
+#endif
         M[i][j] = M[j][i] = d;
       }
     }
