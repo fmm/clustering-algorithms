@@ -36,7 +36,7 @@ void __assert(bool _condition, string _message, const char* _file, int _line) {
 #define dbg(x) std::cerr << STR(x) << " = " << x << std::endl
 #define pv(x,y) \
   do { \
-    for(typeof(y) __xy = (x); __xy != (y); __xy++) { \
+    for(decltype(y) __xy = (x); __xy != (y); __xy++) { \
       std::cerr << *__xy << " "; \
     } \
     std::cerr << std::endl; \
