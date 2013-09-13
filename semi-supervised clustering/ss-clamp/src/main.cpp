@@ -1,16 +1,18 @@
+// everything
 #include "lib.h"
 
-#include "ssclampproductglobal.h"
-#include "ssclampproductlocal.h"
-#include "ssclampsumglobal.h"
-#include "ssclampsumlocal.h"
+// mine
+#include "ssclampproductglobal.h" // prg
+#include "ssclampproductlocal.h" // prl 
+#include "ssclampsumglobal.h" // smg
+#include "ssclampsumlocal.h" // sml
 
-#include "sscard.h"
+// another
+#include "sscard.h" // crd
 
 int main(int argc, char *argv[]) {
-
   string config;
-  unsigned int known = 0;
+  double known = 0;
   string method;
   string output;
 
@@ -20,15 +22,14 @@ int main(int argc, char *argv[]) {
         // TODO: help
         break;
       case 'g':
-        known = Util::cast<int>(optarg);
+        known = Util::cast<double>(optarg);
         dbg(known);
         break;
       case 'm':
-        // TODO: choose method here
+        method = Util::cast<string>(optarg);
         break;
       case 'o':
         output = Util::cast<string>(optarg);
-        dbg(output);
         break;
       default:
         ASSERT(false,"correct usage is: config [-h] [-g known] [-m method] [-o output]");
@@ -48,119 +49,68 @@ int main(int argc, char *argv[]) {
     if(!Util::ends_with(pwc,".pwc")) {
       pwc = pwc + ".pwc";
     }
+    dbg(pwc);
     params.generate_pwc(pwc, known);    
     params.generate_id();
   }
 
-  dbg(params.N);
-  dbg(params.sha1);
-  dbg(params.seed);
+  if(method.size()) {
+    Method *machine = NULL;
 
-  output = params.sha1;
-  
-  string tex = output + ".tex";
-  dbg(tex);
-
-  //return 0;
-
-  //SSClamp algo(params);
-  //SSClampProductGlobal algo(params);
-  //SSClampProductLocal algo(params);
-  //SSClampSumGlobal algo(params); // best weight
-  //SSClampSumLocal algo(params);
-
-  SSCARD algo(params);
-  
-  Method::Answer ans = algo.process();
-
-  vector< vector<unsigned int> > C = algo.compute_confusion_matrix(ans);
-  
-  if(true) for(unsigned int i = 0; i < C.size(); ++i) {
-    for(unsigned int j = 0; j < C[i].size(); ++j) {
-      cout << setw(3) << C[i][j] << " ";    
+    if(method.find("prg") != string::npos) {
+      assert(machine == NULL);
+      machine = new SSClampProductGlobal(params);
     }
-    cout << endl;
+
+    if(method.find("prl") != string::npos) {
+      assert(machine == NULL);
+      machine = new SSClampProductLocal(params);
+    }
+
+    if(method.find("smg") != string::npos) {
+      assert(machine == NULL);
+      machine = new SSClampSumGlobal(params);
+    }
+
+    if(method.find("sml") != string::npos) {
+      assert(machine == NULL);
+      machine = new SSClampSumLocal(params);
+    }
+
+    if(method.find("crd") != string::npos) {
+      assert(machine == NULL);
+      machine = new SSCARD(params);
+    }
+
+    assert(machine != NULL);
+
+    Method::Answer answer = machine->process();
+    string tex = output + ".tex";
+    dbg(tex);
+
+    vector< vector<unsigned int> > confusing_matrix = machine->compute_confusion_matrix(answer);
+    Matrix priori_matrix = machine->compute_priori_matrix();
+    
+    if(true) for(unsigned int i = 0; i < confusing_matrix.size(); ++i) {
+      for(unsigned int j = 0; j < confusing_matrix[i].size(); ++j) {
+        cout << setw(3) << confusing_matrix[i][j] << " ";    
+      }
+      cout << endl;
+    }
+
+    dbg( answer.criterion );
+    dbg( Validation::accuracy(confusing_matrix).first );
+    dbg( Validation::adjusted_rand_index(confusing_matrix) );
+    dbg( Validation::f_measure(confusing_matrix) );
+    dbg( Validation::fuzzy_rand_index_campello(answer.U,priori_matrix) );
+    dbg( Validation::fuzzy_rand_index_hullermeier(answer.U,priori_matrix) );
+  
+    if(machine != NULL) {
+      delete machine;
+      machine = NULL;
+    }
   }
   
-  dbg(Validation::accuracy(C).first);
-  
-  //dbg( Validation::fuzzy_rand_index_hullermeier(ans.U,ans.U) );
-
   return 0;
-
-
-	/*
-	MersenneTwister rnd(1028);
-
-	dbg(rnd.rand_signed());
-
-  Database db("test.db");
-
-	db.execute("select * from config;");
-
-	double d = (double)(0);
-
-	dbg(d);
-
-	//dbg( sha1::process("") );
-	*/
-
-  //start_timer();
-
-	/*MinimumCostMaximumFlow mcmf;
-
-	mcmf.add(1,2,1,1);
-
-	Pair p = mcmf.process(1,2);
-
-	dbg(p.first _ p.second);*/
-	
-	/*time_t t = -1;
-
-  dbg(t);
-  
-  var v=var(0);
-  
-  dbg(v);
-  
-  string x=str(0+1+...+n);
-  dbg(x);*/
-  
-  //Parameter p("x"); 
-  
-  //int x=12;
-  
-  //ASSERT(x == 13, string("x must be 12 ") + "OK?!" );
-  
-  //dbg(x);
-  
-  /*
-  
-  Parameter p("config.txt");
-  dbg(p.N);
-  dbg(p.sha1);
-  dbg(p.seed);
-  
-  */
-  
-  //
-  
-  /*dbg(ans.cluster.size());
-  for(unsigned int i = 0; i < p.N; ++i) {
-    int clus=0;
-    while(!ans.cluster[clus].count(i)) ++clus;
-    dbg(i _ clus);
-  }
-  dbg(ans.criterion _ ans.restriction);*/
-  
-  //Method::load_parameters(p);
-  //Method::Answer a(1);
-  
-  /*;*/
-  
-  //A a;
-  //A::my m;
-  
-	return 0;
 }
 
