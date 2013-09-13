@@ -45,13 +45,12 @@ struct Method {
   bool check_before_update;
 
   Method(Parameter &params) : params(params) {
-    timer.start_timer();
     random = MersenneTwister(params.seed);
     check_before_update = true;
   }
 
   void save_iteration(Answer &answer, string key) {
-    vector< vector<unsigned int> > confusing_matrix = compute_confusion_matrix(answer);
+    vector<vector<unsigned int>> confusing_matrix = compute_confusion_matrix(answer);
     Matrix priori_matrix = compute_priori_matrix();
     string sql = "INSERT INTO answer("
       "algorithm_id,"
@@ -142,7 +141,7 @@ struct Method {
 
   virtual void srand(Answer &answer) = 0;
 
-  virtual bool optimize(Answer &answer) {
+  virtual bool optimize(Answer &answer) {  
     update_clusters(answer);
     double old_criterion = answer.criterion;
     answer.criterion = compute_criterion(answer);
@@ -170,7 +169,7 @@ struct Method {
     }
     for(unsigned int i = 0; i < params.N; ++i) {
       if(params.mask[i]) {
-        vector< pair<double,int> > v(params.C);
+        vector<pair<double,int>> v(params.C);
         for(unsigned int k = 0; k < params.C; ++k) {
           v[k] = make_pair(answer.U[i][k],k);
         }
@@ -179,10 +178,10 @@ struct Method {
     }
   }
 
-  const vector< vector<unsigned int> > compute_confusion_matrix(Answer &answer) {
+  const vector<vector<unsigned int>> compute_confusion_matrix(Answer &answer) {
     unsigned int k = params.C;
     unsigned int p = params.priori_cluster.size();
-    vector< vector<unsigned int> > table(k+1,vector<unsigned int>(p+1,0));
+    vector<vector<unsigned int>> table(k+1,vector<unsigned int>(p+1,0));
     for(unsigned int i = 0; i < k; ++i) {
       for(unsigned int j = 0; j < p; ++j) {
         for(auto iter : answer.cluster[i]) {
@@ -255,40 +254,129 @@ struct Method {
     message << std::setw(6) << std::setfill('0') << ending;
     return message.str();
   }
+  
+  // for a given initalization
+  double find_alpha(Answer &answer) {
+    double begin = 0, end = 1e3;
+    // pretty small error with end - begin <= 1e-3
+    for(unsigned int repeat = 0; repeat < 20; ++repeat) {
+      Answer now = answer;
+      now.alpha = (begin + end) / 2.0;
+      // update criterion according to new alpha
+      now.criterion = compute_criterion(now);
+      for(unsigned int iter = 1; iter <= params.maximum_iteration; ++iter) {
+        if(!optimize(now)) {
+          break;
+        }
+      }
+      if(Util::cmp(now.restriction, 0, now.eps) <= 0) {
+        end = now.alpha;
+      } else {
+        begin = now.alpha;
+      }
+    }
+    // between 'begin' and 'end', let's choose the safest one
+    return end;
+  }
+  
+  double precompute_alpha() {
+    const unsigned int size = 10;
+    vector<double> candidate;
+    vector<thread> workers;
+    mutex candidate_mutex;
+    // create threads
+    for(unsigned int init = 1; init <= size; ++init) {
+      workers.push_back(
+        thread([&](){
+          Answer answer;
+          initialize(answer, 0, 0);
+          srand(answer);
+          double alpha = find_alpha(answer);
+          candidate_mutex.lock();
+          candidate.push_back(alpha);
+          candidate_mutex.unlock();
+        })
+      );
+    }
+    // wait for threads
+    for(auto &task: workers) {
+      task.join();
+    }
+    return *min_element(candidate.begin(),candidate.end());
+  }
+  
+  void run_initialization(Answer &answer, string key) {
+    for(unsigned int iter = 1; iter <= params.maximum_iteration; ++iter) {
+      if(optimize(answer)) {
+        save_iteration(answer,key);
+      } else {
+        break;
+      }
+    }
+  }
 
   Answer process() {
     // hash of the execution
     const string key = params.sha1;
-    // control the number of status prints
-    unsigned long long mask = 1;
-    while(mask<= params.initialization) mask<<=1;
-    mask=(mask>>4)-1;
     // begin transaction
     params.database.open_transaction();
     params.save();
     Answer best;
     initialize(best,0,0);
+    // prepare
+    vector<Answer> candidate(params.initialization);
     for(unsigned int init = 1; init <= params.initialization; ++init) {
+      Answer &answer = candidate[init-1];
+      initialize(answer, init, 0);
+      srand(answer);
+    }
+    // precompute alpha
+    if(Util::cmp(params.alpha) < 0) {
+      params.alpha = precompute_alpha();
+      dbg(params.alpha);
+    }
+    // save initializations
+    for(unsigned int init = 1; init <= params.initialization; ++init) {
+      Answer &answer = candidate[init-1];
+      answer.alpha = params.alpha;
+      answer.criterion = compute_criterion(answer);
+      save_iteration(answer,key);
+    }
+    // execute
+    timer.start_timer();
+#ifdef THREAD_POOL_SIZE
+    const unsigned int thread_pool_size = THREAD_POOL_SIZE;
+#else
+    const unsigned int thread_pool_size = 10;
+#endif
+    for(unsigned int init = 1; init <= params.initialization;) {
       if(timer.elapsed() > params.time_limit) {
         WARNING("time limit was reached at initialization #" + Util::cast<string>(init));
         break;
       }
-      Answer now;
-      initialize(now, init, 0);
-      srand(now);
-      save_iteration(now,key);
-      for(unsigned int iter = 1; iter <= params.maximum_iteration; ++iter) {
-        if(optimize(now)) {
-          save_iteration(now,key);
-        } else {
-          break;
-        }
+      vector<thread> workers;
+      mutex init_mutex;
+      // create the threads
+      unsigned int count = min(thread_pool_size, 1 + params.initialization - init);
+      for(unsigned int c = 0; c < count; ++c) {
+        workers.push_back(
+          thread([&](){
+            init_mutex.lock();
+            unsigned int init_id = init++;
+            init_mutex.unlock();
+            run_initialization(candidate[init_id-1],key);
+          })
+        );
       }
-      // optimize the best result
-      best = min(best, now);
-      if(init == 1 or init == params.initialization or !(init&mask)) {
-        ALERT(status((double)(init)/params.initialization));
+      // wait for threads
+      for(auto &task : workers) {
+        task.join();
       }
+      ALERT(status((double)(init-1)/params.initialization));
+    }
+    // update
+    for(auto &answer : candidate) {
+      best = min(best, answer);
     }
     save_best(best, key);
     // end transaction
