@@ -280,7 +280,7 @@ struct Method {
   }
   
   double precompute_alpha() {
-    const unsigned int size = 10;
+    const unsigned int size = 6;
     vector<double> candidate;
     vector<thread> workers;
     mutex candidate_mutex;
