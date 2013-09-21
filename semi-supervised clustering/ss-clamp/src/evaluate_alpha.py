@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import subprocess
+import time
 
 prog = "./a.out"
 
@@ -53,6 +54,7 @@ def prepare_restrictions(path):
       cmd.append("config.txt")
       cmd.append("-g {0}".format(label))
       cmd.append("-o {0}".format(npath))
+      time.sleep(2)
       print cmd
       subprocess.call(cmd)
 
