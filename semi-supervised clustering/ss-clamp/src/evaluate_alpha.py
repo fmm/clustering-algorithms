@@ -76,7 +76,7 @@ for label in xrange(10,100+1,10):
     npath = get_pwc_name(path,label,repeat)
     flag["[INPUT]"].append(npath)
     #extract seed from previous execution
-    if True:
+    if False:
       cmd = "./get_seed.sh result_iris " + get_pwc_token(label,repeat)
       output = subprocess.Popen(shlex.split(cmd), stdout = subprocess.PIPE).communicate()
       seed = int(output[0])
