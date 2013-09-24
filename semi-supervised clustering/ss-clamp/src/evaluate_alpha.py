@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import sys
-import subprocess
+import subprocess, shlex
 import time
 
 prog = "./a.out"
@@ -41,8 +41,11 @@ def generate_config(path):
       f.write("{0}\n".format(value))
   f.close()
 
+def get_pwc_token(label,repeat):
+  return "l" + str(label) + "r" + str(repeat)
+
 def get_pwc_name(path,label,repeat):
-  return path + "-" + "l" + str(label) + "r" + str(repeat) + ".pwc"
+  return path + "-" + get_pwc_token(label,repeat) + ".pwc"
 
 # run once before the main execution
 def prepare_restrictions(path):
@@ -72,6 +75,12 @@ for label in xrange(10,100+1,10):
     load_config(path + ".txt")
     npath = get_pwc_name(path,label,repeat)
     flag["[INPUT]"].append(npath)
+    #extract seed from previous execution
+    if True:
+      cmd = "./get_seed.sh result_iris " + get_pwc_token(label,repeat)
+      output = subprocess.Popen(shlex.split(cmd), stdout = subprocess.PIPE).communicate()
+      seed = int(output[0])
+      flag["[SEED]"] = [seed]
     generate_config("config.txt")
     subprocess.call(["cat","config.txt"])
     cmd = []
