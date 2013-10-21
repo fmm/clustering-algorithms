@@ -59,6 +59,7 @@ struct Method {
       "criterion,"
       "restriction,"
       "alpha,"
+      "oerc,"
       "accuracy,"
       "adjusted_rand_index,"
       "f_measure,"
@@ -71,13 +72,14 @@ struct Method {
       Util::cast<string>(answer.criterion) + "," +
       Util::cast<string>(answer.restriction) + "," +
       Util::cast<string>(answer.alpha) + "," +
+      Util::cast<string>(Validation::oerc(confusion_matrix)) + "," +
       Util::cast<string>(Validation::accuracy(confusing_matrix).first) + "," +
       Util::cast<string>(Validation::adjusted_rand_index(confusing_matrix)) + "," +
       Util::cast<string>(Validation::f_measure(confusing_matrix)) + "," +
       Util::cast<string>(Validation::fuzzy_rand_index_campello(answer.U,priori_matrix)) + "," +
       Util::cast<string>(Validation::fuzzy_rand_index_hullermeier(answer.U,priori_matrix)) + 
       ");";
-    params.database.execute(sql);              
+    params.database.execute(sql);
   }
 
   void save_best(Answer &answer, string key) {

@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS answer (
     criterion REAL,
     restriction REAL,
     alpha REAL,
+    oerc REAL,
     accuracy REAL,
     adjusted_rand_index REAL,
     f_measure REAL,

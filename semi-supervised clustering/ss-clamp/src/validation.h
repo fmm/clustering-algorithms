@@ -6,7 +6,20 @@
 #include "normalizedmetrics.h"
 
 namespace Validation {
-  pair< double, vector<int> > accuracy(vector< vector<unsigned int> >& tab) {
+  inline double oerc(vector<vector<unsigned int>>& tab) {
+    unsigned int N = tab.size() - 1, M = tab[0].size() - 1;
+    unsigned int match = 0;
+    for(unsigned int i = 0; i < N; i++) {
+      unsigned int nmax = 0;
+      for(unsigned int j = 0; j < M; j++) {
+        nmax = max(nmax, tab[i][j]);
+      }
+      match += nmax;
+    }
+    return 1.0 - (double)(match) / tab[N][M];
+  }
+
+  inline pair<double,vector<int>> accuracy(vector<vector<unsigned int>>& tab) {
     unsigned int N = tab.size() - 1, M = tab[0].size() - 1, source = 0, sink = N + M + 1;
     vector<int> match(N, -1);
     MinimumCostMaximumFlow mcmf;
@@ -35,11 +48,11 @@ namespace Validation {
     return make_pair((double)(-ret.first) / tab[N][M], match);
   }
 
-  unsigned int comb(unsigned int x) {
+  inline unsigned int comb(unsigned int x) {
     return x * (x - 1) / 2;
   }
 
-  double adjusted_rand_index(vector< vector<unsigned int> >& tab) {
+  inline double adjusted_rand_index(vector<vector<unsigned int>>& tab) {
     unsigned int N = tab.size() - 1, M = tab[0].size() - 1;
     double term[4] = {0}, temp[2] = {0};
     double pot = 1.0 / comb(tab[N][M]);
@@ -59,7 +72,7 @@ namespace Validation {
     return (term[1] - term[2]) / (term[3] - term[2]);
   }
 
-  double f_measure(vector< vector<unsigned int> >& tab) {
+  inline double f_measure(vector<vector<unsigned int>>& tab) {
     double F = 0;
     unsigned int N = tab.size() - 1, M = tab[0].size() - 1;
     for(unsigned int j = 0; j < M; ++j) {
@@ -76,7 +89,7 @@ namespace Validation {
     return F / tab[N][M];
   }
 
-  Matrix psi(Matrix U) {
+  inline Matrix psi(Matrix U) {
     unsigned int N = U.size(), C = U[0].size();
     Matrix R(N,Row(N,0.0));
     for(unsigned int j = 0; j < N; ++j) {
@@ -89,7 +102,7 @@ namespace Validation {
     return R;
   }
 
-  double fuzzy_rand_index_campello(Matrix U1, Matrix U2) {
+  inline double fuzzy_rand_index_campello(Matrix U1, Matrix U2) {
     U1 = psi(U1);
     U2 = psi(U2);
     unsigned int N = U1.size();
@@ -109,7 +122,7 @@ namespace Validation {
     }
   }
 
-  double fuzzy_rand_index_hullermeier(Matrix U1, Matrix U2, const Metrics::NormalizedMetrics& E = Metrics::L1) {
+  inline double fuzzy_rand_index_hullermeier(Matrix U1, Matrix U2, const Metrics::NormalizedMetrics& E = Metrics::L1) {
     unsigned int N = U1.size();
     double FRHR = 0;
     for(unsigned int i = 0; i < N; i++) {
