@@ -100,6 +100,7 @@ int main(int argc, char *argv[]) {
 
     dbg( answer.criterion );
     dbg( Validation::accuracy(confusing_matrix).first );
+    dbg( Validation::oerc(confusing_matrix) );
     dbg( Validation::adjusted_rand_index(confusing_matrix) );
     dbg( Validation::f_measure(confusing_matrix) );
     dbg( Validation::fuzzy_rand_index_campello(answer.U,priori_matrix) );

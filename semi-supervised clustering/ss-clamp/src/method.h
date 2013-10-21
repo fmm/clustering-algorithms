@@ -50,8 +50,8 @@ struct Method {
   }
 
   void save_iteration(Answer &answer, string key) {
+    const static Matrix priori_matrix = compute_priori_matrix();
     vector<vector<unsigned int>> confusing_matrix = compute_confusion_matrix(answer);
-    Matrix priori_matrix = compute_priori_matrix();
     string sql = "INSERT INTO answer("
       "algorithm_id,"
       "initialization,"
@@ -256,69 +256,42 @@ struct Method {
     message << std::setw(6) << std::setfill('0') << ending;
     return message.str();
   }
-  
-  // for a given initalization
-  double find_alpha(Answer &answer) {
-    double begin = 0, end = 1e3;
-    // pretty small error with end - begin <= 1e-3
-    for(unsigned int repeat = 0; repeat < 20; ++repeat) {
-      Answer now = answer;
-      now.alpha = (begin + end) / 2.0;
-      // update criterion according to new alpha
-      now.criterion = compute_criterion(now);
+
+  void run_initialization(Answer &answer, string key) {
+    const double max_alpha = 1 << 10;
+    bool loop = (Util::cmp(params.alpha) < 0);
+    if(loop) {
+      // initial value of alpha, I hope it's not too big
+      answer.alpha = 1;
+      answer.criterion = compute_criterion(answer);
+    }
+    do {
+      Answer run = answer;
+      save_iteration(run, key);
       for(unsigned int iter = 1; iter <= params.maximum_iteration; ++iter) {
-        if(!optimize(now)) {
+        if(optimize(run)) {
+          save_iteration(run, key);
+        } else {
           break;
         }
       }
-      if(Util::cmp(now.restriction, 0, now.eps) <= 0) {
-        end = now.alpha;
-      } else {
-        begin = now.alpha;
+      if(Util::cmp(run.restriction,0,run.eps) <= 0 or run.alpha >= max_alpha) {
+        // good enough
+        loop = false;
       }
-    }
-    // between 'begin' and 'end', let's choose the safest one
-    return end;
-  }
-  
-  double precompute_alpha() {
-    const unsigned int size = 6;
-    vector<double> candidate;
-    vector<thread> workers;
-    mutex candidate_mutex;
-    // create threads
-    for(unsigned int init = 1; init <= size; ++init) {
-      workers.push_back(
-        thread([&](){
-          Answer answer;
-          initialize(answer, 0, 0);
-          srand(answer);
-          double alpha = find_alpha(answer);
-          candidate_mutex.lock();
-          candidate.push_back(alpha);
-          candidate_mutex.unlock();
-        })
-      );
-    }
-    // wait for threads
-    for(auto &task: workers) {
-      task.join();
-    }
-    return *min_element(candidate.begin(),candidate.end());
-  }
-  
-  void run_initialization(Answer &answer, string key) {
-    for(unsigned int iter = 1; iter <= params.maximum_iteration; ++iter) {
-      if(optimize(answer)) {
-        save_iteration(answer,key);
+      if(loop) {
+        // test with new alpha next time
+        answer.alpha *= 2;
+        answer.criterion = compute_criterion(answer);
       } else {
-        break;
+        // finalize
+        answer = run;
       }
-    }
+    } while(loop);
   }
 
   Answer process() {
-    // hash of the execution
+    // process's hash
     const string key = params.sha1;
     // begin transaction
     params.database.open_transaction();
@@ -331,18 +304,6 @@ struct Method {
       Answer &answer = candidate[init-1];
       initialize(answer, init, 0);
       srand(answer);
-    }
-    // precompute alpha
-    if(Util::cmp(params.alpha) < 0) {
-      params.alpha = precompute_alpha();
-      dbg(params.alpha);
-    }
-    // save initializations
-    for(unsigned int init = 1; init <= params.initialization; ++init) {
-      Answer &answer = candidate[init-1];
-      answer.alpha = params.alpha;
-      answer.criterion = compute_criterion(answer);
-      save_iteration(answer,key);
     }
     // execute
     timer.start_timer();

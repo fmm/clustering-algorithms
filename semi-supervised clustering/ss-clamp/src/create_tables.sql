@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS answer (
     f_measure REAL,
     fuzzy_rand_index_campello REAL,
     fuzzy_rand_index_hullermeier REAL,
-    PRIMARY KEY(algorithm_id,initialization,iteration),
+    PRIMARY KEY(algorithm_id,initialization,iteration,alpha),
     FOREIGN KEY(algorithm_id) REFERENCES algorithm(sha1)
     );
 
