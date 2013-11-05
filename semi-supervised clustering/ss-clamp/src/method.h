@@ -269,6 +269,13 @@ struct Method {
       Answer run = answer;
       save_iteration(run, key);
       for(unsigned int iter = 1; iter <= params.maximum_iteration; ++iter) {
+#ifdef RATIO_ALPHA
+        double restriction = answer.restriction;
+        double criterion = answer.criterion - restriction * answer.alpha;
+        if(!isnan(criterion/restriction)) {
+          answer.alpha = min(criterion/restriction,(double)(1e6));
+        }
+#endif
         if(optimize(run)) {
           save_iteration(run, key);
         } else {

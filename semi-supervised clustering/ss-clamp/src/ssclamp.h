@@ -7,6 +7,10 @@ struct SSClamp : public Method {
 
   // constructor
   SSClamp(Parameter &params) : Method(params) {
+#ifdef RATIO_ALPHA
+    // minimization is not guaranteed
+    check_before_update = false;
+#endif
   }
   
   virtual inline vector<double> classify(Answer &answer, Matrix &table) {
