@@ -40,6 +40,7 @@ struct SSClampProductLocal : public SSClamp {
         for(unsigned int t = 0; t < params.T; ++t) {
           if(can_update[t]) {
             if(Util::cmp(denominator[t]) <= 0 or Util::cmp(num / denominator[t], MAX_RELEVANCE) >= 0) {
+              answer.Relevance[k][t] = MAX_RELEVANCE;
               bad = true;
               can_update[t] = 0;
               count--;
