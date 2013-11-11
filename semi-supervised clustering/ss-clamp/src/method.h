@@ -270,10 +270,10 @@ struct Method {
       save_iteration(run, key);
       for(unsigned int iter = 1; iter <= params.maximum_iteration; ++iter) {
 #ifdef RATIO_ALPHA
-        double restriction = answer.restriction;
-        double criterion = answer.criterion - restriction * answer.alpha;
+        double restriction = run.restriction;
+        double criterion = run.criterion - restriction * run.alpha;
         if(!isnan(criterion/restriction)) {
-          answer.alpha = min(criterion/restriction,(double)(1e6));
+          run.alpha = min(criterion/restriction,(double)(1e6));
         }
 #endif
         if(optimize(run)) {
