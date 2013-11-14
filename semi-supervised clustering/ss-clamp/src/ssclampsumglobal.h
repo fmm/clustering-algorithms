@@ -21,6 +21,7 @@ struct SSClampSumGlobal : public SSClamp {
   }
 
   virtual void update_relevance(Answer& answer) {
+    ASSERT(Util::cmp(answer.beta) == 0, "unimplemented");
     vector<double> dist(params.T,0.0);
     for(unsigned int t = 0; t < params.T; ++t) {
       for(unsigned int k = 0; k < params.C; ++k) {

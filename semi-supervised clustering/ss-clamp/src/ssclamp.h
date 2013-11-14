@@ -57,7 +57,7 @@ struct SSClamp : public Method {
   }
 
   virtual double compute_criterion(Answer &answer) {
-    double criterion = 0.0, restriction = 0.0;
+    double criterion = 0.0, restriction = 0.0, relevance_bias = 0.0;
     Matrix d(params.N,Row(params.C,0));
     for(unsigned int t = 0; t < params.T; ++t) {
       for(unsigned int i = 0; i < params.N; ++i) {
@@ -98,7 +98,13 @@ struct SSClamp : public Method {
       }
     }
     answer.restriction = restriction;
-    return criterion + answer.alpha * restriction;
+    for(unsigned int k = 0; k < params.C; ++k) {
+      for(unsigned int t = 0; t < params.T; ++t) {
+        relevance_bias += pow(answer.Relevance[k][t],2.0);
+      }
+    }
+    answer.relevance_bias = relevance_bias;
+    return criterion + answer.alpha * restriction + answer.beta * relevance_bias;
   }
 
   virtual void initialize(Answer &answer, unsigned int init, unsigned int iter) {

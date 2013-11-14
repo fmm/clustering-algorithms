@@ -9,6 +9,7 @@ struct SSClampProductGlobal : public SSClamp {
   }
 
   virtual void update_relevance(Answer& answer) {
+    ASSERT(Util::cmp(answer.beta) == 0, "unimplemented");
     double num = 1.0;
     vector<double> denominator(params.T,0.0);
     for(unsigned int t = 0; t < params.T; ++t) {

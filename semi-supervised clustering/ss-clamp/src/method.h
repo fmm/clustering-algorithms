@@ -29,7 +29,9 @@ struct Method {
     unsigned int iteration;
     double criterion;
     double restriction;
+    double relevance_bias;
     double alpha;
+    double beta;
     vector<Cluster> cluster;
     Matrix U;
     Matrix Relevance;
@@ -58,7 +60,9 @@ struct Method {
       "iteration,"
       "criterion,"
       "restriction,"
+      "relevance_bias,"
       "alpha,"
+      "beta,"
       "oerc,"
       "accuracy,"
       "adjusted_rand_index,"
@@ -71,7 +75,9 @@ struct Method {
       Util::cast<string>(answer.iteration) + "," +
       Util::cast<string>(answer.criterion) + "," +
       Util::cast<string>(answer.restriction) + "," +
+      Util::cast<string>(answer.relevance_bias) + "," +
       Util::cast<string>(answer.alpha) + "," +
+      Util::cast<string>(answer.beta) + "," +
       Util::cast<string>(Validation::oerc(confusing_matrix)) + "," +
       Util::cast<string>(Validation::accuracy(confusing_matrix).first) + "," +
       Util::cast<string>(Validation::adjusted_rand_index(confusing_matrix)) + "," +
@@ -132,7 +138,13 @@ struct Method {
     answer.iteration = iter;
     answer.criterion = INF;
     answer.restriction = INF;
+    answer.relevance_bias = INF;
     answer.alpha = params.alpha;
+#ifdef BETA
+    answer.beta = BETA;
+#else
+    answer.beta = 0;
+#endif
     answer.cluster = vector<Cluster>(params.C);
     answer.U = Matrix(params.N,Row(params.C));
     answer.Relevance = Matrix(params.C,Row(params.T));
@@ -270,8 +282,9 @@ struct Method {
       save_iteration(run, key);
       for(unsigned int iter = 1; iter <= params.maximum_iteration; ++iter) {
 #ifdef RATIO_ALPHA
-        double restriction = run.restriction;
-        double criterion = run.criterion - restriction * run.alpha;
+        double relevance_bias = run.relevance_bias * run.beta;
+        double restriction = run.restriction * run.alpha;
+        double criterion = run.criterion - restriction - relevance_bias;
         if(!isnan(criterion/restriction)) {
           run.alpha = min(criterion/restriction,(double)(1e6));
         }
