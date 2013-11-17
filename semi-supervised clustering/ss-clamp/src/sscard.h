@@ -34,8 +34,10 @@ struct SSCARD : public Method {
       for(unsigned int i = 0; i < params.N; ++i) {
         denominator += pow(answer.U[i][k], 2.0);
       }
-      VALIDATE_DENOMINATOR(denominator);
-      criterion += numerator / 2.0 / denominator;
+      if(Util::cmp(numerator) > 0) {
+        VALIDATE_DENOMINATOR(denominator);
+        criterion += numerator / 2.0 / denominator;
+      }
     }
     for(auto x : params.must_link) {
       unsigned int l = x.first, m = x.second;
