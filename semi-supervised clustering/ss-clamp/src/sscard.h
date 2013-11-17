@@ -114,21 +114,24 @@ struct SSCARD : public Method {
         }
       }
     }
-    // check
-    for(unsigned int k = 0; k < params.C; ++k) {
-      for(unsigned int t = 0; t < params.T; ++t) {
-        VALIDATE_DENOMINATOR(D[k][t]);
-      }
-    }
     // assignment
     for(unsigned int k = 0; k < params.C; ++k) {
+      bool good = true;
       for(unsigned int t = 0; t < params.T; ++t) {
-        double value = 0;
-        for(unsigned int p = 0; p < params.T; ++p) {
-          value += pow(D[k][t] / D[k][p], 1.0 / (SSCARD::Q-1));
+        if(Util::cmp(D[k][t]) <= 0) {
+          good = false;
         }
-        VALIDATE_DENOMINATOR(value);
-        answer.Relevance[k][t] = 1.0 / value;
+      }
+      if(good) {
+        for(unsigned int t = 0; t < params.T; ++t) {
+          double value = 0;
+          for(unsigned int p = 0; p < params.T; ++p) {
+            VALIDATE_DENOMINATOR(D[k][p]);
+            value += pow(D[k][t] / D[k][p], 1.0 / (SSCARD::Q-1));
+          }
+          VALIDATE_DENOMINATOR(value);
+          answer.Relevance[k][t] = 1.0 / value;
+        }
       }
     }
   }
