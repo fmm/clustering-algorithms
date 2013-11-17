@@ -34,10 +34,8 @@ struct SSCARD : public Method {
       for(unsigned int i = 0; i < params.N; ++i) {
         denominator += pow(answer.U[i][k], 2.0);
       }
-      if(Util::cmp(numerator) > 0) {
-        VALIDATE_DENOMINATOR(denominator);
-        criterion += numerator / 2.0 / denominator;
-      }
+      VALIDATE_DENOMINATOR(denominator);
+      criterion += numerator / 2.0 / denominator;
     }
     for(auto x : params.must_link) {
       unsigned int l = x.first, m = x.second;
@@ -116,24 +114,21 @@ struct SSCARD : public Method {
         }
       }
     }
+    // check
+    for(unsigned int k = 0; k < params.C; ++k) {
+      for(unsigned int t = 0; t < params.T; ++t) {
+        VALIDATE_DENOMINATOR(D[k][t]);
+      }
+    }
     // assignment
     for(unsigned int k = 0; k < params.C; ++k) {
-      bool good = true;
       for(unsigned int t = 0; t < params.T; ++t) {
-        if(Util::cmp(D[k][t]) <= 0) {
-          good = false;
+        double value = 0;
+        for(unsigned int p = 0; p < params.T; ++p) {
+          value += pow(D[k][t] / D[k][p], 1.0 / (SSCARD::Q-1));
         }
-      }
-      if(good) {
-        for(unsigned int t = 0; t < params.T; ++t) {
-          double value = 0;
-          for(unsigned int p = 0; p < params.T; ++p) {
-            VALIDATE_DENOMINATOR(D[k][p]);
-            value += pow(D[k][t] / D[k][p], 1.0 / (SSCARD::Q-1));
-          }
-          VALIDATE_DENOMINATOR(value);
-          answer.Relevance[k][t] = 1.0 / value;
-        }
+        VALIDATE_DENOMINATOR(value);
+        answer.Relevance[k][t] = 1.0 / value;
       }
     }
   }
