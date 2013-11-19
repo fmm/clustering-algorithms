@@ -282,9 +282,9 @@ struct Method {
       save_iteration(run, key);
       for(unsigned int iter = 1; iter <= params.maximum_iteration; ++iter) {
 #ifdef RATIO_ALPHA
-        double relevance_bias = run.relevance_bias * run.beta;
-        double restriction = run.restriction * run.alpha;
-        double criterion = run.criterion - restriction - relevance_bias;
+        double relevance_bias = run.relevance_bias;
+        double restriction = run.restriction;
+        double criterion = run.criterion - restriction * run.alpha - relevance_bias * run.beta;
         if(!isnan(criterion/restriction)) {
           run.alpha = min(criterion/restriction,(double)(1e6));
         }
